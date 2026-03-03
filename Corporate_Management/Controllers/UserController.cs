@@ -40,11 +40,11 @@ namespace Corporate_Management.Controllers
         }
 
         [HttpPut("UpdateUser")]
-        public async Task<IActionResult> UpdateUser(int id, RegisterDto userDto)
+        public async Task<IActionResult> UpdateUser(RegisterDto userDto)
         {
             try
             {
-                var userId = await _userRepositories.UpdateUserAsync(id, userDto);
+                var userId = await _userRepositories.UpdateUserAsync(userDto);
                 return Ok(new { message = "User updated Succesfully" });
             }
             catch (Exception ex)
@@ -122,7 +122,8 @@ namespace Corporate_Management.Controllers
                 };
                 var Token = _getToken.GenerateJwtToken(response);
 
-                return Ok(new { message = "Login successful", token = Token });
+                return Ok(new { message = "Login successful", token = Token, role = user.RoleName, userId = user.Id });
+
             }
             catch (Exception ex)
             {

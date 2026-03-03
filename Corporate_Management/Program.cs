@@ -1,6 +1,7 @@
 using Corporate_Management;
 using Corporate_Management.Repositories.IRepositories;
 using Corporate_Management.Repositories.IRepositories.Repositories;
+using Corporate_Management.Repositories.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -12,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddScoped<GetJwtToken>();
 builder.Services.AddScoped<IUserRepositories, UserRepositories>();
+builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

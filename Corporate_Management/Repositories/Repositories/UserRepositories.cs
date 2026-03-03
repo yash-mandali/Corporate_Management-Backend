@@ -38,13 +38,13 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
             }
         }
 
-        public async Task<int> UpdateUserAsync(int id, RegisterDto userDto)
+        public async Task<int> UpdateUserAsync(RegisterDto userDto)
         {
             try
             {
                 using var connection = new SqlConnection(_connectionString);
                 var parameters = new DynamicParameters();
-                parameters.Add("@Id", id);
+                parameters.Add("@Id", userDto.Id);
                 parameters.Add("@UserName", userDto.UserName);
                 parameters.Add("@Email", userDto.Email);
                 parameters.Add("@PhoneNumber", userDto.PhoneNumber);
