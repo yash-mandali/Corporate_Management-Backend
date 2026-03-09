@@ -36,7 +36,7 @@ namespace Corporate_Management.Controllers
             }
         }
 
-        [HttpPut("updateLeave")]
+        [HttpPut("updateLeave/{id}")]
         public async Task<IActionResult> UpdateLeave(int id, updateLeaveDto leavemodel)
         {
             try
@@ -79,7 +79,6 @@ namespace Corporate_Management.Controllers
             }
         }
 
-
         [HttpGet("getLeaveById")]
         public async Task<IActionResult> getLeaveById(int id)
         {
@@ -98,7 +97,6 @@ namespace Corporate_Management.Controllers
                 return BadRequest(new { message = "Error retrieving leave", error = ex.Message });
             }
         }
-
 
         [HttpPost("GetAllLeaves")]
         public async Task<IActionResult> getAllLeaves()
@@ -119,12 +117,12 @@ namespace Corporate_Management.Controllers
             }
         }
 
-        [HttpPut("withdrawLeave")]
-        public async Task<IActionResult> WithdrawLeave(int id)
+        [HttpPut("withdrawLeave/{leaveRequestId}")]
+        public async Task<IActionResult> WithdrawLeave(int leaveRequestId)
         {
             try 
             {
-                var result = await _leaveRepositories.WithdrawLeave(id);
+                var result = await _leaveRepositories.WithdrawLeave(leaveRequestId);
 
                 if (!result)
                 {
@@ -159,6 +157,63 @@ namespace Corporate_Management.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = "Failed to get Pending leaves", error = ex.Message });
+            }
+        }
+        [HttpGet("GetAllApprovedLeaves")]
+        public async Task<IActionResult> GetApprovedLeaves()
+        {
+            try
+            {
+                var leaves = await _leaveRepositories.GetAllApprovedLeaves();
+
+                return Ok(new
+                {
+                    message = "approved leaves...",
+                    TotalLeaves = leaves.Count(),
+                    data = leaves
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to get approved leaves", error = ex.Message });
+            }
+        }
+        [HttpGet("GetAllRejectedLeaves")]
+        public async Task<IActionResult> GetAllRejectedLeaves()
+        {
+            try
+            {
+                var leaves = await _leaveRepositories.GetAllRejectedLeaves();
+
+                return Ok(new
+                {
+                    message = "rejected leaves...",
+                    TotalLeaves = leaves.Count(),
+                    data = leaves
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to get rejected leaves", error = ex.Message });
+            }
+        }
+        [HttpGet("GetAllWithdrawnLeaves")]
+        public async Task<IActionResult> GetAllWithdrawnLeaves()
+        {
+            try
+            {
+                var leaves = await _leaveRepositories.GetAllWithdrawnLeaves();
+
+                return Ok(new
+                {
+                    message = "withdrawn leaves...",
+                    TotalLeaves = leaves.Count(),
+                    data = leaves
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to get withdrawn leaves", error = ex.Message });
             }
         }
 

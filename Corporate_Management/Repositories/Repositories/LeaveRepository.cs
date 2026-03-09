@@ -49,7 +49,6 @@ namespace Corporate_Management.Repositories.Repositories
             parameters.Add("@RequestType", leavemodel.RequestType);
             parameters.Add("@FromDate", leavemodel.FromDate);
             parameters.Add("@ToDate", leavemodel.ToDate);
-            parameters.Add("@TotalDays", leavemodel.TotalDays);
             parameters.Add("@Session", leavemodel.Session);
             parameters.Add("@Reason", leavemodel.Reason);
             parameters.Add("@HandoverTo", leavemodel.HandoverTo);
@@ -143,6 +142,39 @@ namespace Corporate_Management.Repositories.Repositories
 
             var leaves = await connection.QueryAsync<LeaveListDto>(
                 "sp_GetPendingLeaves",
+                commandType: CommandType.StoredProcedure
+            );
+
+            return leaves;
+        }
+        public async Task<IEnumerable<LeaveListDto>> GetAllRejectedLeaves()
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var leaves = await connection.QueryAsync<LeaveListDto>(
+                "sp_GetRejectedLeaves",
+                commandType: CommandType.StoredProcedure
+            );
+
+            return leaves;
+        }
+        public async Task<IEnumerable<LeaveListDto>> GetAllApprovedLeaves()
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var leaves = await connection.QueryAsync<LeaveListDto>(
+                "sp_GetApprovedLeaves",
+                commandType: CommandType.StoredProcedure
+            );
+
+            return leaves;
+        }
+        public async Task<IEnumerable<LeaveListDto>> GetAllWithdrawnLeaves()
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var leaves = await connection.QueryAsync<LeaveListDto>(
+                "sp_GetWithdrawnLeaves",
                 commandType: CommandType.StoredProcedure
             );
 
