@@ -1,4 +1,5 @@
 ﻿using Corporate_Management.DTOs;
+using Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
 using Dapper;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -24,8 +25,8 @@ namespace Corporate_Management.Repositories.Repositories
                 using var connection = new SqlConnection(_connectionString);
                 var parameters = new DynamicParameters();
                 parameters.Add("@UserId",Id);
-                var checkindata =await connection.ExecuteAsync("sp_checkIn", parameters, commandType: CommandType.StoredProcedure);
-                return checkindata;
+                var checkindata =await connection.ExecuteScalarAsync<int>("sp_checkIn", parameters, commandType: CommandType.StoredProcedure);
+                return checkindata;   
             }
             catch(Exception ex) 
             {
@@ -33,19 +34,65 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
-        public async Task<int> userCheckOut(int Id)
+        public async Task<int> userCheckOut(int AId)
         {
             try
             {
                 using var connection = new SqlConnection(_connectionString);
                 var parameters = new DynamicParameters();          
-                parameters.Add("@AttendenceId",Id);
+                parameters.Add("@AttendenceId",AId);
                 var checkindata = await connection.ExecuteAsync("sp_checkOut", parameters, commandType: CommandType.StoredProcedure);
                 return checkindata;
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        public async Task<IEnumerable<AttendanceDto>> getByUserId(int Id)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@Id", Id);
+                var userdata = await connection.QueryAsync<AttendanceDto>("sp_getAttendenceByUserId", parameters, commandType: CommandType.StoredProcedure);
+                return userdata;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<IEnumerable<AttendanceDto>> getByAttendanceId(int Id)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@Id", Id);
+                var attendancedata = await connection.QueryAsync<AttendanceDto>("sp_getByAttendenceId", parameters, commandType: CommandType.StoredProcedure);
+                return attendancedata;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<IEnumerable<AttendanceDto>> GetAllAttendanceAsync()
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var data = await connection.QueryAsync<AttendanceDto>("sp_getAllAttendance", commandType: CommandType.StoredProcedure);
+                return data;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 

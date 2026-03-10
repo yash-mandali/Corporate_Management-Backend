@@ -5,6 +5,9 @@ namespace Corporate_Management.Repositories.IRepositories
     public interface IAttendanceRepository
     {
         Task<int> userCheckIn(int Id);
-        Task<int> userCheckOut(int Id);
+        Task<int> userCheckOut(int AId);
+        Task<IEnumerable<AttendanceDto>> getByUserId(int Id);
+        Task<IEnumerable<AttendanceDto>> getByAttendanceId(int Id);
+        Task<IEnumerable<AttendanceDto>> GetAllAttendanceAsync();
     }
 }

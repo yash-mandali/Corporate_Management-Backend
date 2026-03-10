@@ -1,4 +1,5 @@
 ﻿using Corporate_Management.DTOs;
+using Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
 using Corporate_Management.Repositories.Repositories;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +30,7 @@ namespace Corporate_Management.Controllers
                 {
                     return BadRequest(new { message = "failed to checkin" });
                 }
-                return Ok(new { message = "CheckedIn" });
+                return Ok(new { message = "CheckedIn", attendanceId = checkin });
             }
             catch(Exception ex)
             {
@@ -38,11 +39,11 @@ namespace Corporate_Management.Controllers
         }
 
         [HttpPut("CheckOut")]
-        public async Task<IActionResult> CheckOut(int Id)
+        public async Task<IActionResult> CheckOut(int AId)
         {
             try
             {
-                var checkout = await _attendanceRepository.userCheckOut(Id);
+                var checkout = await _attendanceRepository.userCheckOut(AId);
 
                 if (checkout == null)
                 {
@@ -53,6 +54,64 @@ namespace Corporate_Management.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = "Failed to checkOut", error = ex.Message });
+            }
+        }
+
+
+        [HttpGet("getByUserId")]
+        public async Task<IActionResult> getAttendanceByUserId(int Id)
+        {
+            try
+            {
+                var data = await _attendanceRepository.getByUserId(Id);
+
+                if (data == null)
+                {
+                    return BadRequest(new { message = "failed to load data" });
+                }
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to fetch data", error = ex.Message });
+            }
+        }
+
+        [HttpGet("getByAttendanceId")]
+        public async Task<IActionResult> getAttendanceByAttendanceId(int Id)
+        {
+            try
+            {
+                var data = await _attendanceRepository.getByAttendanceId(Id);
+
+                if (data == null)
+                {
+                    return BadRequest(new { message = "failed to load data" });
+                }
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to fetch data", error = ex.Message });
+            }
+        }
+
+        [HttpGet("GetAllAttendance")]
+        public async Task<IActionResult> getAllLeaves()
+        {
+            try
+            {
+                var Attendance = await _attendanceRepository.GetAllAttendanceAsync();
+
+                if (Attendance == null)
+                    return NotFound(new { message = "Attendance not found" });
+
+                return Ok(Attendance);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to fetch Attendance", error = ex.Message });
             }
         }
     }
