@@ -36,7 +36,7 @@ namespace Corporate_Management.Controllers
             {
                 return BadRequest(new { message = "Failed to checkIn", error = ex.Message });
             }
-        }
+        }   
 
         [HttpPut("CheckOut")]
         public async Task<IActionResult> CheckOut(int AId)

@@ -28,9 +28,10 @@ namespace Corporate_Management.Repositories.Repositories
                 var checkindata =await connection.ExecuteScalarAsync<int>("sp_checkIn", parameters, commandType: CommandType.StoredProcedure);
                 return checkindata;   
             }
-            catch(Exception ex) 
+            catch (SqlException ex)
             {
-                throw ex;
+                
+                throw new Exception(ex.Message);
             }
         }
 
