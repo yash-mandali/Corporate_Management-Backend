@@ -57,7 +57,6 @@ namespace Corporate_Management.Controllers
             {
                 return BadRequest(new { message = "Failed to update leaves", error = ex.Message });
             }
-
         }
 
         [HttpGet("getMyLeaves")]
@@ -98,7 +97,7 @@ namespace Corporate_Management.Controllers
             }
         }
 
-        [HttpPost("GetAllLeaves")]
+        [HttpGet("GetAllLeaves")]
         public async Task<IActionResult> getAllLeaves()
         {
             try

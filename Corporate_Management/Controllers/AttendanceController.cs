@@ -57,6 +57,21 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        [HttpPut("AutoCheckout")]
+        public async Task<IActionResult> AutoCheckout()
+        {
+            try
+            {
+                var result = await _attendanceRepository.AutoCheckout();
+
+                return Ok(new { message = "Auto checkout completed", rowsUpdated = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Auto checkout failed", error = ex.Message });
+            }
+        }
+
 
         [HttpGet("getByUserId")]
         public async Task<IActionResult> getAttendanceByUserId(int Id)

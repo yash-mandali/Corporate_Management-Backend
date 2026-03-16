@@ -6,6 +6,7 @@ namespace Corporate_Management.Repositories.IRepositories
     {
         Task<int> userCheckIn(int Id);
         Task<int> userCheckOut(int AId);
+        Task<int> AutoCheckout();
         Task<IEnumerable<AttendanceDto>> getByUserId(int Id);
         Task<IEnumerable<AttendanceDto>> getByAttendanceId(int Id);
         Task<IEnumerable<AttendanceDto>> GetAllAttendanceAsync();

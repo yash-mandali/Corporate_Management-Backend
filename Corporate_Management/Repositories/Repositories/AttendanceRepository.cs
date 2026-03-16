@@ -51,6 +51,17 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
+        public async Task<int> AutoCheckout()
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var result = await connection.ExecuteAsync(
+                "sp_AutoCheckout",
+                commandType: CommandType.StoredProcedure
+            );
+
+            return result;
+        }
         public async Task<IEnumerable<AttendanceDto>> getByUserId(int Id)
         {
             try
