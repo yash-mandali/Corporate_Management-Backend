@@ -16,7 +16,7 @@ namespace Corporate_Management.Repositories.Repositories
             _connectionString = config.GetConnectionString("dbconnection");
         }
 
-        public async Task<int> AddTimesheetEntry(Timesheet timesheet)
+        public async Task<int> AddTimesheetEntry(AddTimesheet timesheet)
         {
             try
             {
@@ -144,5 +144,88 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
+
+        public async Task<int> SubmitTimesheetEntry(int sheetId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@sheetId", sheetId);
+
+                var rows = await connection.ExecuteAsync(
+                    "sp_SubmitTimesheet",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return rows;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> ApproveTimesheetEntry(int sheetId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@sheetId", sheetId);
+
+                var rows = await connection.ExecuteAsync(
+                    "sp_ApproveTimesheet",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return rows;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> RejectTimesheetEntry(int sheetId, string reason)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@sheetId", sheetId);
+                parameters.Add("@RejectReason", reason);
+                var rows = await connection.ExecuteAsync("sp_RejectTimesheet", parameters,commandType: CommandType.StoredProcedure );
+                return rows;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Timesheet> getTimesheetByStatus(string status)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@Status", status);
+
+                var rows = await connection.QueryFirstOrDefaultAsync<Timesheet>(
+                    "sp_GetTimesheetByStatus",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return rows;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

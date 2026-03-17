@@ -3,6 +3,7 @@ using Corporate_Management.Models.Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
 using Corporate_Management.Repositories.IRepositories.Repositories;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Corporate_Management.Controllers
@@ -19,7 +20,7 @@ namespace Corporate_Management.Controllers
         }
 
         [HttpPost("AddTimesheetEntry")]
-        public async Task<IActionResult> AddTimesheetEntry(Timesheet timesheet)
+        public async Task<IActionResult> AddTimesheetEntry(AddTimesheet timesheet)
         {
             try
             {
@@ -124,6 +125,74 @@ namespace Corporate_Management.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = "Timesheet delete error", error = ex.Message });
+            }
+        }
+
+        [HttpPost("submitTimesheet")]
+        public async Task<IActionResult> submitTimesheet(int sheetId)
+        {
+            try
+            {
+                var userId = await _timesheetrepository.SubmitTimesheetEntry(sheetId);
+                return Ok(new { message = "Timesheet submited Succesfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Timesheet submit error", error = ex.Message });
+            }
+        }
+
+        [HttpPost("ApproveTimesheet(manager)")]
+        public async Task<IActionResult> ApproveTimesheet(int sheetId)
+        {
+            try
+            {
+                var userId = await _timesheetrepository.ApproveTimesheetEntry(sheetId);
+                if (userId == null)
+                    return NotFound(new { message = "Id not found" });
+
+                return Ok(new { message = "Timesheet Approved Succesfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Timesheet Approved error", error = ex.Message });
+            }
+        }
+
+        [HttpPost("RejectTimesheet(manager)")]
+        public async Task<IActionResult> RejectTimesheet(int sheetId, string reason)
+        {
+            try
+            {
+                var result = await _timesheetrepository.RejectTimesheetEntry(sheetId, reason);
+                if (result == null)
+                    return NotFound(new { message = "data not found" });
+
+
+
+                return Ok(new { message = "Timesheet Rejected" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Timesheet Rejected error", error = ex.Message });
+            }
+        }
+
+        [HttpGet("getByStatus(manager)")]
+        public async Task<IActionResult> getTimesheetByStatus(string status)
+        {
+            try
+            {
+                var timesheet = await _timesheetrepository.getTimesheetByStatus(status);
+
+                if (timesheet == null)
+                    return NotFound(new { message = "status not found" });
+
+                return Ok(timesheet); ;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "failed to fetch Timesheet", error = ex.Message });
             }
         }
     }
