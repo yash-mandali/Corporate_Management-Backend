@@ -114,6 +114,7 @@ namespace Corporate_Management.Controllers
 
                 if (user == null)
                     return Unauthorized(new { message = "Invalid email or password" });
+
                 var response = new LoginResponseDto
                 {
                     Id = user.Id,

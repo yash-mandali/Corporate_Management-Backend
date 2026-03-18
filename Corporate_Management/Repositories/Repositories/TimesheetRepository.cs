@@ -86,7 +86,7 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
-        public async Task<Timesheet> getTimesheetEntryByUserId(int userId)
+        public async Task<IEnumerable<Timesheet>> getTimesheetEntryByUserId(int userId)
         {
             try
             {
@@ -94,12 +94,7 @@ namespace Corporate_Management.Repositories.Repositories
                 var parameters = new DynamicParameters();
                 parameters.Add("@UserId", userId);
 
-                var rows = await connection.QueryFirstOrDefaultAsync<Timesheet>(
-                    "sp_getTimesheetEntryByUserId",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-
+                var rows = await connection.QueryAsync<Timesheet>("sp_getTimesheetEntryByUserId", parameters,commandType: CommandType.StoredProcedure);
                 return rows;
             }
             catch (Exception)
@@ -206,7 +201,7 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
-        public async Task<Timesheet> getTimesheetByStatus(string status)
+        public async Task<IEnumerable<Timesheet>> getTimesheetByStatus(string status)
         {
             try
             {
@@ -214,7 +209,7 @@ namespace Corporate_Management.Repositories.Repositories
                 var parameters = new DynamicParameters();
                 parameters.Add("@Status", status);
 
-                var rows = await connection.QueryFirstOrDefaultAsync<Timesheet>(
+                var rows = await connection.QueryAsync<Timesheet>(
                     "sp_GetTimesheetByStatus",
                     parameters,
                     commandType: CommandType.StoredProcedure
