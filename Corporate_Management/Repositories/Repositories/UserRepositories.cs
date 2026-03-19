@@ -111,6 +111,20 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
             }
         }
 
+        public async Task<IEnumerable<UserListDto>> GetAllEmployeeAsync()
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var Users = await connection.QueryAsync<UserListDto>("sp_GetAllEmployee", commandType: CommandType.StoredProcedure);
+                return Users;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<User> LoginUser(LoginDto logindto)
         {
             using var connection = new SqlConnection(_connectionString);

@@ -105,6 +105,25 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        [HttpGet("getAllEmployee")]
+        public async Task<IActionResult> getAllemployee()
+        {
+            try
+            {
+                var user = await _userRepositories.GetAllEmployeeAsync();
+
+                if (user == null)
+                    return NotFound(new { message = "Employees not found" });
+
+                return Ok(user);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error retrieving Employees", error = ex.Message });
+            }
+        }
+
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDto logindto)
         {
