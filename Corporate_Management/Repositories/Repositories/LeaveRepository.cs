@@ -119,7 +119,6 @@ namespace Corporate_Management.Repositories.Repositories
                 throw;
             }
         }
-
         public async Task<bool> WithdrawLeave(int leaveRequestId)
         {
             using var connection = new SqlConnection(_connectionString);
@@ -135,7 +134,6 @@ namespace Corporate_Management.Repositories.Repositories
 
             return result > 0;
         }
-
         public async Task<IEnumerable<LeaveListDto>> GetAllPendingLeaves()
         {
             using var connection = new SqlConnection(_connectionString);

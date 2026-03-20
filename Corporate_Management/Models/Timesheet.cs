@@ -7,6 +7,7 @@
         public class Timesheet        {
             public int TimesheetId { get; set; }
             public int UserId { get; set; }
+            public string UserName { get; set; }
             public DateTime WorkDate { get; set; }
             public string? ProjectName { get; set; }
             public string? TaskDescription { get; set; }
