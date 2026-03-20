@@ -38,7 +38,7 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
             }
         }
 
-        public async Task<int> UpdateUserAsync(RegisterDto userDto)
+        public async Task<int> UpdateUserAsync(UpdateUserDto userDto)
         {
             try
             {
@@ -48,11 +48,10 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 parameters.Add("@UserName", userDto.UserName);
                 parameters.Add("@Email", userDto.Email);
                 parameters.Add("@PhoneNumber", userDto.PhoneNumber);
-                parameters.Add("@Password", BCrypt.Net.BCrypt.HashPassword(userDto.Password));
+                //parameters.Add("@Password", BCrypt.Net.BCrypt.HashPassword(userDto.Password));
                 parameters.Add("@Gender", userDto.Gender);
                 parameters.Add("@Address", userDto.Address);
-                parameters.Add("@RoleId", userDto.RoleId);
-                
+                //parameters.Add("@RoleId", userDto.RoleId);              
 
                 var updatedrows = await connection.ExecuteAsync("sp_UpdateUser", parameters, commandType: CommandType.StoredProcedure);
                 return updatedrows;
@@ -80,7 +79,7 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
             }
         }
 
-        public async Task<User> GetUserByIdAsync(int id)
+        public async Task<UserListDto> GetUserByIdAsync(int id)
         {
             try
             {
@@ -88,7 +87,7 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 var parameters = new DynamicParameters();
                 parameters.Add("@Id", id);
 
-                var updatedrows = await connection.QueryFirstOrDefaultAsync<User>("sp_GetUserById", parameters, commandType: CommandType.StoredProcedure);
+                var updatedrows = await connection.QueryFirstOrDefaultAsync<UserListDto>("sp_GetUserById", parameters, commandType: CommandType.StoredProcedure);
                 return updatedrows;
             }
             catch (Exception)

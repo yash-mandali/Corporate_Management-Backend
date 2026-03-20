@@ -40,7 +40,7 @@ namespace Corporate_Management.Controllers
         }
 
         [HttpPut("UpdateUser")]
-        public async Task<IActionResult> UpdateUser(RegisterDto userDto)
+        public async Task<IActionResult> UpdateUser(UpdateUserDto userDto)
         {
             try
             {

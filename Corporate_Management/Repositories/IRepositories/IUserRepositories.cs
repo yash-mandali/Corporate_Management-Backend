@@ -6,9 +6,9 @@ namespace Corporate_Management.Repositories.IRepositories
     public interface IUserRepositories
     {
         Task<int> AddUserAsync(RegisterDto userDto);
-        Task<int> UpdateUserAsync(RegisterDto userDto);
+        Task<int> UpdateUserAsync(UpdateUserDto userDto);
         Task<int> DeleteUserAsync(int id);
-        Task<User> GetUserByIdAsync(int id);
+        Task<UserListDto> GetUserByIdAsync(int id);
         Task<IEnumerable<UserListDto>> GetAllUserAsync();
         Task<IEnumerable<UserListDto>> GetAllEmployeeAsync();
         Task<User> LoginUser(LoginDto logindto);
