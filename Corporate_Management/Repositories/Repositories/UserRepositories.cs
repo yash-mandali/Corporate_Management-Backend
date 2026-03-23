@@ -123,6 +123,19 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
+        public async Task<IEnumerable<UserListDto>> GetAllManagerAsync()
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var Users = await connection.QueryAsync<UserListDto>("sp_getAllManagers", commandType: CommandType.StoredProcedure);
+                return Users;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         public async Task<User> LoginUser(LoginDto logindto)
         {
@@ -146,6 +159,37 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 return null;
 
             return user;
+        }
+
+        public async Task LogoutUser(int userId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@UserId", userId);
+
+            await connection.ExecuteAsync(
+                "sp_LogoutUser",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+        }
+
+        public async Task<IEnumerable<UserListDto>> GetManagerTeam(int managerId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@ManagerId", managerId);
+
+                var updatedrows = await connection.QueryAsync<UserListDto>("sp_getManagerTeam", parameters, commandType: CommandType.StoredProcedure);
+                return updatedrows;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

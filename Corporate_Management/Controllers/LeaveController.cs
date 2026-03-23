@@ -2,6 +2,7 @@
 using Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
 using Corporate_Management.Repositories.IRepositories.Repositories;
+using Corporate_Management.Repositories.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -116,6 +117,24 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        [HttpGet("managerTeam-AllLeaves")]
+        public async Task<IActionResult> GetTeamAllLeaveRequests(int managerId)
+        {
+            try 
+            {
+                var leaves = await _leaveRepositories.GetTeamAllLeaveRequests(managerId);
+
+                if (leaves == null)
+                    return NotFound(new { message = "Leaves not found" });
+
+                return Ok(leaves);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to fetch leaves", error = ex.Message });
+            }
+        }
+
         [HttpPut("withdrawLeave/{leaveRequestId}")]
         public async Task<IActionResult> WithdrawLeave(int leaveRequestId)
         {
@@ -216,12 +235,26 @@ namespace Corporate_Management.Controllers
             }
         }
 
-        [HttpPut("Approve-Leave")]
-        public async Task<IActionResult> ApproveLeave(int id)
+        [HttpGet("managerteam-pendingleaves")]
+        public async Task<IActionResult> GetManagerPendingLeaves(int managerId)
+        {
+            try
+            {
+                var result = await _leaveRepositories.GetManagerTeamPendingLeaves(managerId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to get pending leaves", error = ex.Message });
+            }
+        }  //Manager
+
+        [HttpPut("ManagerApproveLeave")]
+        public async Task<IActionResult> ManagerApproveLeave(int id)
         {
             try 
             {
-                var result = await _leaveRepositories.ApproveLeave(id);
+                var result = await _leaveRepositories.ManagerApproveLeave(id);
 
                 if (!result)
                 {
@@ -239,12 +272,12 @@ namespace Corporate_Management.Controllers
             }
         }
 
-        [HttpPut("Reject-Leave")]
-        public async Task<IActionResult> RejectLeave(int id)
+        [HttpPut("ManagerRejectLeave")]
+        public async Task<IActionResult> ManagerRejectLeave(int id)
         {
             try
             {
-                var result = await _leaveRepositories.RejectLeave(id);
+                var result = await _leaveRepositories.ManagerRejectLeave(id);
 
                 if (!result)
                 {
@@ -259,6 +292,21 @@ namespace Corporate_Management.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = "Failed to Reject leave", error = ex.Message });
+            }
+        }
+
+        [HttpPut("AutoRejectLeave")]
+        public async Task<IActionResult> AutoCheckout()
+        {
+            try
+            {
+                var result = await _leaveRepositories.AutoRejectLeave();
+
+                return Ok(new { message = "AutoLeave Rejected", rowsUpdated = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "AutoLeave Rejecte failed", error = ex.Message });
             }
         }
     }

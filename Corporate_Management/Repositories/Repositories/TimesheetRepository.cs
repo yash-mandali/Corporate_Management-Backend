@@ -117,6 +117,27 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
+        public async Task<IEnumerable<Timesheet>> GetManagerTeamTimesheets(int managerId)
+        {
+            try 
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@ManagerId", managerId);
+
+                var result = await connection.QueryAsync<Timesheet>(
+                    "sp_managerTeamAllTimesheetEntry",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+            return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<int> deleteTimesheetEntry(int sheetId)
         {
             try
@@ -162,7 +183,7 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
-        public async Task<int> ApproveTimesheetEntry(int sheetId)
+        public async Task<int> ApproveByManager(int sheetId)
         {
             try
             {
@@ -171,7 +192,7 @@ namespace Corporate_Management.Repositories.Repositories
                 parameters.Add("@sheetId", sheetId);
 
                 var rows = await connection.ExecuteAsync(
-                    "sp_ApproveTimesheet",
+                    "sp_ManagerApproveTimesheet",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
@@ -184,7 +205,7 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
-        public async Task<int> RejectTimesheetEntry(int sheetId, string reason)
+        public async Task<int> RejectByManager(int sheetId, string reason)
         {
             try
             {
@@ -192,7 +213,7 @@ namespace Corporate_Management.Repositories.Repositories
                 var parameters = new DynamicParameters();
                 parameters.Add("@sheetId", sheetId);
                 parameters.Add("@RejectReason", reason);
-                var rows = await connection.ExecuteAsync("sp_RejectTimesheet", parameters,commandType: CommandType.StoredProcedure );
+                var rows = await connection.ExecuteAsync("sp_ManagerRejectTimesheet", parameters,commandType: CommandType.StoredProcedure );
                 return rows;
             }
             catch (Exception)

@@ -9,14 +9,17 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<IEnumerable<LeaveListDto>> GetLeaveByIUserId(int id);
         Task<IEnumerable<LeaveListDto>> GetLeaveByLeaveId(int id);
         Task<IEnumerable<LeaveListDto>> GetAllLeaveAsync();
+        Task<IEnumerable<LeaveListDto>> GetTeamAllLeaveRequests(int managerId);
         Task<bool> WithdrawLeave(int leaveRequestId);
         Task<bool> UpdateLeave(int leaveId, updateLeaveDto leavemodel);
         Task<IEnumerable<LeaveListDto>> GetAllPendingLeaves();
         Task<IEnumerable<LeaveListDto>> GetAllRejectedLeaves();
         Task<IEnumerable<LeaveListDto>> GetAllApprovedLeaves();
         Task<IEnumerable<LeaveListDto>> GetAllWithdrawnLeaves();
-        Task<bool> ApproveLeave(int leaveId);
-        Task<bool> RejectLeave(int leaveId);
+        Task<IEnumerable<LeaveListDto>> GetManagerTeamPendingLeaves(int managerId);
+        Task<bool> ManagerApproveLeave(int leaveId);
+        Task<bool> ManagerRejectLeave(int leaveId);
+        Task<int> AutoRejectLeave();
 
     }
 }

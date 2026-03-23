@@ -10,5 +10,6 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<IEnumerable<AttendanceDto>> getByUserId(int Id);
         Task<IEnumerable<AttendanceDto>> getByAttendanceId(int Id);
         Task<IEnumerable<AttendanceDto>> GetAllAttendanceAsync();
+        Task<IEnumerable<AttendanceDto>> GetTeamAllAttendance(int managerId); 
     }
 }

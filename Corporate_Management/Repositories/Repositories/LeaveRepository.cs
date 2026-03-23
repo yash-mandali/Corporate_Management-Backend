@@ -39,7 +39,6 @@ namespace Corporate_Management.Repositories.Repositories
                 throw ex;
             }
         }
-
         public async Task<bool> UpdateLeave(int leaveId, updateLeaveDto leavemodel)
         {
             using var connection = new SqlConnection(_connectionString);
@@ -61,7 +60,6 @@ namespace Corporate_Management.Repositories.Repositories
 
             return result > 0;
         }
-
         public async Task<IEnumerable<LeaveListDto>> GetLeaveByIUserId(int id)
         {
             try
@@ -83,7 +81,6 @@ namespace Corporate_Management.Repositories.Repositories
                 throw;
             }
         }
-
         public async Task<IEnumerable<LeaveListDto>> GetLeaveByLeaveId(int id)
         {
             try
@@ -105,7 +102,6 @@ namespace Corporate_Management.Repositories.Repositories
                 throw;
             }
         }
-
         public async Task<IEnumerable<LeaveListDto>> GetAllLeaveAsync()
         {
             try
@@ -118,6 +114,21 @@ namespace Corporate_Management.Repositories.Repositories
             {
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<LeaveListDto>> GetTeamAllLeaveRequests(int managerId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            var parameters = new DynamicParameters();
+            parameters.Add("@ManagerId", managerId);
+
+            var result = await connection.QueryAsync<LeaveListDto>(
+                "sp_GetTeamAllLeaveRequests",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            return result;
         }
         public async Task<bool> WithdrawLeave(int leaveRequestId)
         {
@@ -144,6 +155,22 @@ namespace Corporate_Management.Repositories.Repositories
             );
 
             return leaves;
+        }
+
+        public async Task<IEnumerable<LeaveListDto>> GetManagerTeamPendingLeaves(int managerId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@ManagerId", managerId);
+
+            var result = await connection.QueryAsync<LeaveListDto>(
+                "sp_GetManagerTeamPendingLeaves",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            return result;
         }
         public async Task<IEnumerable<LeaveListDto>> GetAllRejectedLeaves()
         {
@@ -178,8 +205,7 @@ namespace Corporate_Management.Repositories.Repositories
 
             return leaves;
         }
-
-        public async Task<bool> ApproveLeave(int leaveId)
+        public async Task<bool> ManagerApproveLeave(int leaveId)
         {
             using var connection = new SqlConnection(_connectionString);
 
@@ -187,7 +213,22 @@ namespace Corporate_Management.Repositories.Repositories
             parameters.Add("@LeaveRequestId", leaveId);
 
             var result = await connection.ExecuteAsync(
-                "sp_ApproveLeave",
+                "sp_ManagerApproveLeave",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            return result > 0;
+        }
+        public async Task<bool> ManagerRejectLeave(int leaveId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@LeaveRequestId", leaveId);
+
+            var result = await connection.ExecuteAsync(
+                "sp_ManagerRejectLeave",
                 parameters,
                 commandType: CommandType.StoredProcedure
             );
@@ -195,20 +236,16 @@ namespace Corporate_Management.Repositories.Repositories
             return result > 0;
         }
 
-        public async Task<bool> RejectLeave(int leaveId)
+        public async Task<int> AutoRejectLeave()
         {
             using var connection = new SqlConnection(_connectionString);
 
-            var parameters = new DynamicParameters();
-            parameters.Add("@LeaveRequestId", leaveId);
-
             var result = await connection.ExecuteAsync(
-                "sp_RejectLeave",
-                parameters,
+                "sp_AutoRejectLeaves",
                 commandType: CommandType.StoredProcedure
             );
 
-            return result > 0;
+            return result;
         }
 
     }

@@ -6,6 +6,8 @@
 
         public int UserId { get; set; }
 
+        public int ManagerId { get; set; }
+
         public DateTime Date { get; set; }
 
         public string? Day { get; set; }   // Computed column from SQL

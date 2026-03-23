@@ -10,10 +10,11 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<Timesheet> getTimesheetEntryById(int sheetId);
         Task<IEnumerable<Timesheet>> getTimesheetEntryByUserId(int userId);
         Task<IEnumerable<Timesheet>> getAllTimesheetEntry();
+        Task<IEnumerable<Timesheet>> GetManagerTeamTimesheets(int managerId);
         Task<int> deleteTimesheetEntry(int sheetId);
         Task<int> SubmitTimesheetEntry(int sheetId);
-        Task<int> ApproveTimesheetEntry(int sheetId);
-        Task<int> RejectTimesheetEntry(int sheetId, string reason);
+        Task<int> ApproveByManager(int sheetId);
+        Task<int> RejectByManager(int sheetId, string reason);
         Task<IEnumerable<Timesheet>> getTimesheetByStatus(string status);
     }
 }

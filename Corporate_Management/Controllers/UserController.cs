@@ -124,6 +124,25 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        [HttpGet("getAllManagers")]
+        public async Task<IActionResult> getAllManagers()
+        {
+            try
+            {
+                var user = await _userRepositories.GetAllManagerAsync();
+
+                if (user == null)
+                    return NotFound(new { message = "Managers not found" });
+
+                return Ok(user);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error retrieving Managers", error = ex.Message });
+            }
+        }
+
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDto logindto)
         {
@@ -148,6 +167,45 @@ namespace Corporate_Management.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = "Error retrieving user", error = ex.Message });
+            }
+        }
+
+        [HttpPost("Logout")]
+        public async Task<IActionResult> Logout(int userId)
+        {
+            try 
+            {
+                await _userRepositories.LogoutUser(userId);
+
+                return Ok(new
+                {
+                    message = "user logout"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "logout failed", error = ex.Message });
+            }
+
+        }
+
+
+        [HttpGet("getManagerTeam")]
+        public async Task<IActionResult> getManagerTeam(int managerId)
+        {
+            try
+            {
+                var user = await _userRepositories.GetManagerTeam(managerId);
+
+                if (user == null)
+                    return NotFound(new { message = "Team not found" });
+
+                return Ok(user);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error retrieving Team", error = ex.Message });
             }
         }
     }

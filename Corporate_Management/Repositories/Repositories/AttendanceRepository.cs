@@ -108,5 +108,20 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
+        public async Task<IEnumerable<AttendanceDto>> GetTeamAllAttendance(int managerId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            var parameters = new DynamicParameters();
+            parameters.Add("@ManagerId", managerId);
+
+            var result = await connection.QueryAsync<AttendanceDto>(
+                "sp_getTeamAllAttendance",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            return result;
+        }
+
     }
 }

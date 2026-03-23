@@ -72,7 +72,6 @@ namespace Corporate_Management.Controllers
             }
         }
 
-
         [HttpGet("getByUserId")]
         public async Task<IActionResult> getAttendanceByUserId(int Id)
         {
@@ -112,11 +111,30 @@ namespace Corporate_Management.Controllers
         }
 
         [HttpGet("GetAllAttendance")]
-        public async Task<IActionResult> getAllLeaves()
+        public async Task<IActionResult> getAllAttendance()
         {
             try
             {
                 var Attendance = await _attendanceRepository.GetAllAttendanceAsync();
+
+                if (Attendance == null)
+                    return NotFound(new { message = "Attendance not found" });
+
+                return Ok(Attendance);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to fetch Attendance", error = ex.Message });
+            }
+        }
+
+        [HttpGet("GetTeamAllAttendance")]
+        public async Task<IActionResult> getTeamAllAttendance(int managerId)
+        {
+            try
+            {
+                var Attendance = await _attendanceRepository.GetTeamAllAttendance(managerId);
 
                 if (Attendance == null)
                     return NotFound(new { message = "Attendance not found" });

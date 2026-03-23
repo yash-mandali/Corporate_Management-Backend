@@ -2,6 +2,7 @@
 using Corporate_Management.Models.Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
 using Corporate_Management.Repositories.IRepositories.Repositories;
+using Corporate_Management.Repositories.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -114,6 +115,20 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        [HttpGet("manager-GetAlltimesheets")]
+        public async Task<IActionResult> GetManagerTeamTimesheets(int managerId)
+        {
+            try 
+            {
+                var result = await _timesheetrepository.GetManagerTeamTimesheets(managerId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to fetch timesheets", error = ex.Message });
+            }
+        }
+
         [HttpDelete("DeleteTimesheet")]
         public async Task<IActionResult> DeleteUser(int sheetId)
         {
@@ -142,16 +157,16 @@ namespace Corporate_Management.Controllers
             }
         }
 
-        [HttpPost("ApproveTimesheet(manager)")]
-        public async Task<IActionResult> ApproveTimesheet(int sheetId)
+        [HttpPut("ManagerApproveT")]
+        public async Task<IActionResult> ManagerApprove(int sheetId)
         {
             try
             {
-                var userId = await _timesheetrepository.ApproveTimesheetEntry(sheetId);
+                var userId = await _timesheetrepository.ApproveByManager(sheetId);
                 if (userId == null)
                     return NotFound(new { message = "Id not found" });
 
-                return Ok(new { message = "Timesheet Approved Succesfully" });
+                return Ok(new { message = "Timesheet Approved " });
             }
             catch (Exception ex)
             {
@@ -159,12 +174,12 @@ namespace Corporate_Management.Controllers
             }
         }
 
-        [HttpPost("RejectTimesheet(manager)")]
-        public async Task<IActionResult> RejectTimesheet(int sheetId, string reason)
+        [HttpPut("ManagerRejectT")]
+        public async Task<IActionResult> ManagerReject(int sheetId, string reason)
         {
             try
             {
-                var result = await _timesheetrepository.RejectTimesheetEntry(sheetId, reason);
+                var result = await _timesheetrepository.RejectByManager(sheetId, reason);
                 if (result == null)
                     return NotFound(new { message = "data not found" });
 
