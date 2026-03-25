@@ -16,10 +16,18 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<IEnumerable<LeaveListDto>> GetAllRejectedLeaves();
         Task<IEnumerable<LeaveListDto>> GetAllApprovedLeaves();
         Task<IEnumerable<LeaveListDto>> GetAllWithdrawnLeaves();
+        Task<int> AutoRejectLeave();
+
+        //----------------------------------Manager-------------------------------
         Task<IEnumerable<LeaveListDto>> GetManagerTeamPendingLeaves(int managerId);
+        Task<IEnumerable<LeaveListDto>> GetManagerApprovedLeaves();
         Task<bool> ManagerApproveLeave(int leaveId);
         Task<bool> ManagerRejectLeave(int leaveId);
-        Task<int> AutoRejectLeave();
+
+
+        //----------------------------------HR------------------------------------
+        Task<bool> HrApproveLeave(int leaveId);
+        Task<bool> HrRejectLeave(int leaveId);
 
     }
 }

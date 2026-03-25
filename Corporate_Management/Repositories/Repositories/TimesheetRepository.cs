@@ -117,27 +117,6 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
-        public async Task<IEnumerable<Timesheet>> GetManagerTeamTimesheets(int managerId)
-        {
-            try 
-            {
-                using var connection = new SqlConnection(_connectionString);
-                var parameters = new DynamicParameters();
-                parameters.Add("@ManagerId", managerId);
-
-                var result = await connection.QueryAsync<Timesheet>(
-                    "sp_managerTeamAllTimesheetEntry",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-            return result;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public async Task<int> deleteTimesheetEntry(int sheetId)
         {
             try
@@ -160,7 +139,6 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
-
         public async Task<int> SubmitTimesheetEntry(int sheetId)
         {
             try
@@ -182,6 +160,30 @@ namespace Corporate_Management.Repositories.Repositories
                 throw;
             }
         }
+
+        public async Task<IEnumerable<Timesheet>> getTimesheetByStatus(string status)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@Status", status);
+
+                var rows = await connection.QueryAsync<Timesheet>(
+                    "sp_GetTimesheetByStatus",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return rows;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //----------------------------------Manager-------------------------------
 
         public async Task<int> ApproveByManager(int sheetId)
         {
@@ -213,7 +215,7 @@ namespace Corporate_Management.Repositories.Repositories
                 var parameters = new DynamicParameters();
                 parameters.Add("@sheetId", sheetId);
                 parameters.Add("@RejectReason", reason);
-                var rows = await connection.ExecuteAsync("sp_ManagerRejectTimesheet", parameters,commandType: CommandType.StoredProcedure );
+                var rows = await connection.ExecuteAsync("sp_ManagerRejectTimesheet", parameters, commandType: CommandType.StoredProcedure);
                 return rows;
             }
             catch (Exception)
@@ -222,26 +224,28 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
-        public async Task<IEnumerable<Timesheet>> getTimesheetByStatus(string status)
+        public async Task<IEnumerable<Timesheet>> GetManagerTeamTimesheets(int managerId)
         {
             try
             {
                 using var connection = new SqlConnection(_connectionString);
                 var parameters = new DynamicParameters();
-                parameters.Add("@Status", status);
+                parameters.Add("@ManagerId", managerId);
 
-                var rows = await connection.QueryAsync<Timesheet>(
-                    "sp_GetTimesheetByStatus",
+                var result = await connection.QueryAsync<Timesheet>(
+                    "sp_managerTeamAllTimesheetEntry",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
-
-                return rows;
+                return result;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
+
+ 
     }
 }

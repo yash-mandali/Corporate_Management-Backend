@@ -127,7 +127,7 @@ namespace Corporate_Management.Controllers
             {
                 return BadRequest(new { message = "Failed to fetch timesheets", error = ex.Message });
             }
-        }
+        }  //manager
 
         [HttpDelete("DeleteTimesheet")]
         public async Task<IActionResult> DeleteUser(int sheetId)
@@ -193,6 +193,7 @@ namespace Corporate_Management.Controllers
             }
         }
 
+  
         [HttpGet("getByStatus(manager)")]
         public async Task<IActionResult> getTimesheetByStatus(string status)
         {

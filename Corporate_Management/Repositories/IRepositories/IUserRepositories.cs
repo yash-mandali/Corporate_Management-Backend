@@ -11,10 +11,12 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<UserListDto> GetUserByIdAsync(int id);
         Task<IEnumerable<UserListDto>> GetManagerTeam(int managerId);
         Task<IEnumerable<UserListDto>> GetAllUserAsync();
+        Task<IEnumerable<UserListDto>> GetAllEmployeeManagers();
         Task<IEnumerable<UserListDto>> GetAllEmployeeAsync();
         Task<IEnumerable<UserListDto>> GetAllManagerAsync();
         Task<User> LoginUser(LoginDto logindto);
         Task LogoutUser(int userId);
+        Task<IEnumerable<UserListDto>> GetEmployeeByDepartment(string department);
     }
 }
 

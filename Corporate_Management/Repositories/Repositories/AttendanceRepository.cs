@@ -107,7 +107,6 @@ namespace Corporate_Management.Repositories.Repositories
                 throw;
             }
         }
-
         public async Task<IEnumerable<AttendanceDto>> GetTeamAllAttendance(int managerId)
         {
             using var connection = new SqlConnection(_connectionString);

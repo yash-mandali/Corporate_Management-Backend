@@ -115,7 +115,6 @@ namespace Corporate_Management.Repositories.Repositories
                 throw;
             }
         }
-
         public async Task<IEnumerable<LeaveListDto>> GetTeamAllLeaveRequests(int managerId)
         {
             using var connection = new SqlConnection(_connectionString);
@@ -156,22 +155,6 @@ namespace Corporate_Management.Repositories.Repositories
 
             return leaves;
         }
-
-        public async Task<IEnumerable<LeaveListDto>> GetManagerTeamPendingLeaves(int managerId)
-        {
-            using var connection = new SqlConnection(_connectionString);
-
-            var parameters = new DynamicParameters();
-            parameters.Add("@ManagerId", managerId);
-
-            var result = await connection.QueryAsync<LeaveListDto>(
-                "sp_GetManagerTeamPendingLeaves",
-                parameters,
-                commandType: CommandType.StoredProcedure
-            );
-
-            return result;
-        }
         public async Task<IEnumerable<LeaveListDto>> GetAllRejectedLeaves()
         {
             using var connection = new SqlConnection(_connectionString);
@@ -200,6 +183,45 @@ namespace Corporate_Management.Repositories.Repositories
 
             var leaves = await connection.QueryAsync<LeaveListDto>(
                 "sp_GetWithdrawnLeaves",
+                commandType: CommandType.StoredProcedure
+            );
+
+            return leaves;
+        }
+        public async Task<int> AutoRejectLeave()
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var result = await connection.ExecuteAsync(
+                "sp_AutoRejectLeaves",
+                commandType: CommandType.StoredProcedure
+            );
+
+            return result;
+        }
+
+        //----------------------------------Manager-------------------------------
+        public async Task<IEnumerable<LeaveListDto>> GetManagerTeamPendingLeaves(int managerId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@ManagerId", managerId);
+
+            var result = await connection.QueryAsync<LeaveListDto>(
+                "sp_GetManagerTeamPendingLeaves",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            return result;
+        }
+        public async Task<IEnumerable<LeaveListDto>> GetManagerApprovedLeaves()
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var leaves = await connection.QueryAsync<LeaveListDto>(
+                "sp_GetManagerApprovedLeaves",
                 commandType: CommandType.StoredProcedure
             );
 
@@ -236,16 +258,38 @@ namespace Corporate_Management.Repositories.Repositories
             return result > 0;
         }
 
-        public async Task<int> AutoRejectLeave()
+
+        //----------------------------------HR------------------------------------
+
+        public async Task<bool> HrApproveLeave(int leaveId)
         {
             using var connection = new SqlConnection(_connectionString);
 
+            var parameters = new DynamicParameters();
+            parameters.Add("@LeaveRequestId", leaveId);
+
             var result = await connection.ExecuteAsync(
-                "sp_AutoRejectLeaves",
+                "sp_HrApproveLeave",
+                parameters,
                 commandType: CommandType.StoredProcedure
             );
 
-            return result;
+            return result > 0;
+        }
+        public async Task<bool> HrRejectLeave(int leaveId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@LeaveRequestId", leaveId);
+
+            var result = await connection.ExecuteAsync(
+                "sp_HrRejectLeave",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            return result > 0;
         }
 
     }

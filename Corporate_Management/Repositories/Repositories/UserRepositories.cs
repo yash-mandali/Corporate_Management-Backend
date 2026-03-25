@@ -14,6 +14,8 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
         {
             _connectionString = config.GetConnectionString("dbconnection");
         }
+       
+
         public async Task<int> AddUserAsync(RegisterDto userDto)
         {
             try
@@ -24,6 +26,7 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 parameters.Add("@Email", userDto.Email);
                 parameters.Add("@PhoneNumber", userDto.PhoneNumber);
                 parameters.Add("@Password", BCrypt.Net.BCrypt.HashPassword(userDto.Password));
+                parameters.Add("@Department", userDto.Department);
                 parameters.Add("@Gender", userDto.Gender);
                 parameters.Add("@Address", userDto.Address);
                 parameters.Add("@RoleId", userDto.RoleId);
@@ -36,7 +39,7 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
             {
                 throw ex;
             }
-        }
+        }   
 
         public async Task<int> UpdateUserAsync(UpdateUserDto userDto)
         {
@@ -48,10 +51,10 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 parameters.Add("@UserName", userDto.UserName);
                 parameters.Add("@Email", userDto.Email);
                 parameters.Add("@PhoneNumber", userDto.PhoneNumber);
-                //parameters.Add("@Password", BCrypt.Net.BCrypt.HashPassword(userDto.Password));
+                parameters.Add("@Department", userDto.Department);
                 parameters.Add("@Gender", userDto.Gender);
                 parameters.Add("@Address", userDto.Address);
-                //parameters.Add("@RoleId", userDto.RoleId);              
+                            
 
                 var updatedrows = await connection.ExecuteAsync("sp_UpdateUser", parameters, commandType: CommandType.StoredProcedure);
                 return updatedrows;
@@ -109,6 +112,19 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
+        public async Task<IEnumerable<UserListDto>> GetAllEmployeeManagers()
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var Users = await connection.QueryAsync<UserListDto>("sp_GetAllEmployeeManager", commandType: CommandType.StoredProcedure);
+                return Users;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         public async Task<IEnumerable<UserListDto>> GetAllEmployeeAsync()
         {
@@ -123,6 +139,7 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
+
         public async Task<IEnumerable<UserListDto>> GetAllManagerAsync()
         {
             try
@@ -184,6 +201,23 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 parameters.Add("@ManagerId", managerId);
 
                 var updatedrows = await connection.QueryAsync<UserListDto>("sp_getManagerTeam", parameters, commandType: CommandType.StoredProcedure);
+                return updatedrows;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<UserListDto>> GetEmployeeByDepartment(string department)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@Department", department);
+
+                var updatedrows = await connection.QueryAsync<UserListDto>("sp_GetEmployeeByDepartment", parameters, commandType: CommandType.StoredProcedure);
                 return updatedrows;
             }
             catch (Exception)

@@ -105,6 +105,25 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        [HttpGet("getAllEmployeeManager")]
+        public async Task<IActionResult> getAllEmployeeManager()
+        {
+            try
+            {
+                var user = await _userRepositories.GetAllEmployeeManagers();
+
+                if (user == null)
+                    return NotFound(new { message = "users not found" });
+
+                return Ok(user);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error retrieving users", error = ex.Message });
+            }
+        }
+
         [HttpGet("getAllEmployee")]
         public async Task<IActionResult> getAllemployee()
         {
@@ -188,8 +207,7 @@ namespace Corporate_Management.Controllers
             }
 
         }
-
-
+    
         [HttpGet("getManagerTeam")]
         public async Task<IActionResult> getManagerTeam(int managerId)
         {
@@ -206,6 +224,25 @@ namespace Corporate_Management.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = "Error retrieving Team", error = ex.Message });
+            }
+        }
+
+        [HttpGet("GetEmployeeByDepartment")]
+        public async Task<IActionResult> GetEmployeeByDepartment(string department)
+        {
+            try
+            {
+                var user = await _userRepositories.GetEmployeeByDepartment(department);
+
+                if (user == null)
+                    return NotFound(new { message = "Employee not found" });
+
+                return Ok(user);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error retrieving Employee", error = ex.Message });
             }
         }
     }

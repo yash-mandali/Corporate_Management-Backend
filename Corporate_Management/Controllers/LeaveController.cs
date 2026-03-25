@@ -235,6 +235,26 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        [HttpGet("GetManagerApprovedLeaves")]
+        public async Task<IActionResult> GetManagerApprovedLeaves()
+        {
+            try
+            {
+                var leaves = await _leaveRepositories.GetManagerApprovedLeaves();
+
+                return Ok(new
+                {
+                    message = "ManahgerApproved leaves...",
+                    TotalLeaves = leaves.Count(),
+                    data = leaves
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to get leaves", error = ex.Message });
+            }
+        }
+
         [HttpGet("managerteam-pendingleaves")]
         public async Task<IActionResult> GetManagerPendingLeaves(int managerId)
         {
@@ -272,12 +292,57 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        [HttpPut("HrApproveLeave")]
+        public async Task<IActionResult> HrApproveLeave(int id)
+        {
+            try
+            {
+                var result = await _leaveRepositories.HrApproveLeave(id);
+
+                if (!result)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Leave cannot be approved."
+                    });
+                }
+
+                return Ok(new { message = "Leave approved" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to Approve leave", error = ex.Message });
+            }
+        }
         [HttpPut("ManagerRejectLeave")]
         public async Task<IActionResult> ManagerRejectLeave(int id)
         {
             try
             {
                 var result = await _leaveRepositories.ManagerRejectLeave(id);
+
+                if (!result)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Leave cannot be Rejected."
+                    });
+                }
+
+                return Ok(new { message = "Leave Rejected" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to Reject leave", error = ex.Message });
+            }
+        }
+
+        [HttpPut("HrRejectLeave")]
+        public async Task<IActionResult> HrRejectLeave(int id)
+        {
+            try
+            {
+                var result = await _leaveRepositories.HrRejectLeave(id);
 
                 if (!result)
                 {
