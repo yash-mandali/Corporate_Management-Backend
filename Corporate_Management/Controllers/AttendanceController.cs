@@ -1,4 +1,5 @@
-﻿using Corporate_Management.DTOs;
+﻿using ClosedXML.Excel;
+using Corporate_Management.DTOs;
 using Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
 using Corporate_Management.Repositories.Repositories;
@@ -145,6 +146,87 @@ namespace Corporate_Management.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = "Failed to fetch Attendance", error = ex.Message });
+            }
+        }
+
+        [HttpGet("GetAttendanceReport")]
+        public async Task<IActionResult> getReport([FromQuery] AttendanceReportParameters parameters)
+        {
+            try
+            {
+                var Attendance = await _attendanceRepository.GetAttendanceReport(parameters);
+
+                if (Attendance == null)
+                    return NotFound(new { message = "Record not found" });
+
+                return Ok(new {message="getRepport api called",TotalRecords = Attendance.Count(), Report = Attendance });
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to fetch Record", error = ex.Message });
+            }
+        }
+
+        [HttpGet("ExportAttendanceReport")]
+        public async Task<IActionResult> ExportAttendanceReport([FromQuery] AttendanceReportParameters parameters)
+        {
+            try
+            {
+                var data = await _attendanceRepository.GetAttendanceReport(parameters);
+
+                if (data == null || !data.Any())
+                    return NotFound(new { message = "No records found for report." });
+
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Attendance Report");
+
+                // Header
+                worksheet.Cell(1, 1).Value = "Employee Name";
+                worksheet.Cell(1, 2).Value = "Department";
+                worksheet.Cell(1, 3).Value = "Date";
+                worksheet.Cell(1, 4).Value = "Check In";
+                worksheet.Cell(1, 5).Value = "Check Out";
+                worksheet.Cell(1, 6).Value = "Working Hours";
+                worksheet.Cell(1, 7).Value = "Status";
+
+                var headerRange = worksheet.Range("A1:G1");
+
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Font.FontColor = XLColor.RichBlack;
+                headerRange.Style.Fill.BackgroundColor = XLColor.AshGrey;
+                headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                headerRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                int row = 2;
+
+                foreach (var item in data)
+                {
+                    worksheet.Cell(row, 1).Value = item.EmployeeName;
+                    worksheet.Cell(row, 2).Value = item.Department;
+                    worksheet.Cell(row, 3).Value = item.Date.ToString("yyyy-MM-dd");
+                    worksheet.Cell(row, 4).Value = item.CheckIn;
+                    worksheet.Cell(row, 5).Value = item.CheckOut;
+                    worksheet.Cell(row, 6).Value = item.WorkingHours;
+                    worksheet.Cell(row, 7).Value = item.Status;
+                    row++;
+                }
+
+                worksheet.Columns().AdjustToContents();
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                stream.Position = 0;
+
+                return File(
+                    stream.ToArray(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"Attendance_Report_{DateTime.Now:yyyyMMdd}.xlsx"
+                );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to generate report", error = ex.Message });
             }
         }
     }

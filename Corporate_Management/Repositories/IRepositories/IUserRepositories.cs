@@ -17,6 +17,7 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<User> LoginUser(LoginDto logindto);
         Task LogoutUser(int userId);
         Task<IEnumerable<UserListDto>> GetEmployeeByDepartment(string department);
+        Task<bool> AssignManagerAsync(int userId, int managerId);
     }
 }
 

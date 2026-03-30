@@ -225,5 +225,27 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
+
+        public async Task<bool> AssignManagerAsync(int userId, int managerId)
+        {
+            try 
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@UserId", userId);
+                parameters.Add("@ManagerId", managerId);
+
+                var result = await connection.ExecuteAsync(
+                    "sp_AssignManager",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+                return result > 0;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

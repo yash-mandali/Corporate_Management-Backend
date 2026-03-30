@@ -1,4 +1,5 @@
 ﻿using Corporate_Management.DTOs;
+using Corporate_Management.Models;
 
 namespace Corporate_Management.Repositories.IRepositories
 {
@@ -10,6 +11,7 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<IEnumerable<AttendanceDto>> getByUserId(int Id);
         Task<IEnumerable<AttendanceDto>> getByAttendanceId(int Id);
         Task<IEnumerable<AttendanceDto>> GetAllAttendanceAsync();
-        Task<IEnumerable<AttendanceDto>> GetTeamAllAttendance(int managerId); 
+        Task<IEnumerable<AttendanceDto>> GetTeamAllAttendance(int managerId);
+        Task<IEnumerable<AttendanceReportDto>> GetAttendanceReport(AttendanceReportParameters param);
     }
 }

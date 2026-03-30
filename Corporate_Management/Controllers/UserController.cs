@@ -245,5 +245,28 @@ namespace Corporate_Management.Controllers
                 return BadRequest(new { message = "Error retrieving Employee", error = ex.Message });
             }
         }
+
+        [HttpPost("assign-manager")]
+        public async Task<IActionResult> AssignManager(int userId, int managerId)
+        {
+            try
+            {
+                var result = await _userRepositories.AssignManagerAsync(userId, managerId);
+
+                //if (!result) {
+                //    return BadRequest("Manager assignment failed");
+                //}
+                    
+
+                return Ok(new
+                {
+                    message = "Manager assigned successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "failed", error = ex.Message });
+            }
+        }
     }
 }
