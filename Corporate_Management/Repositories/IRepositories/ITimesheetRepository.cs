@@ -11,9 +11,7 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<IEnumerable<Timesheet>> getTimesheetEntryByUserId(int userId);
         Task<IEnumerable<Timesheet>> getAllTimesheetEntry();
         Task<int> deleteTimesheetEntry(int sheetId);
-        Task<int> SubmitTimesheetEntry(int sheetId);
-       
-        
+        Task<int> SubmitTimesheetEntry(int sheetId);        
         Task<IEnumerable<Timesheet>> getTimesheetByStatus(string status);
         //----------------------------------Manager-------------------------------
 
