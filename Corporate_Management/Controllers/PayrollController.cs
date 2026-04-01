@@ -1,5 +1,6 @@
 ﻿using Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
+using Corporate_Management.Repositories.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,8 +17,8 @@ namespace Corporate_Management.Controllers
             _payrollRepository = payrollRepository;
         }
 
-        [HttpPost("createSalaryStructure")]
-        public async Task<IActionResult> CreateSalaryStructure(SalaryStructure model)
+        [HttpPost("createSalaryStructure")] 
+        public async Task<IActionResult> CreateSalaryStructure(createSalaryStructure model)
         {
             try
             {
@@ -63,6 +64,20 @@ namespace Corporate_Management.Controllers
                     success = false,
                     message = ex.Message
                 });
+            }
+        }
+
+        [HttpDelete("deleteSalaryStructure")]
+        public async Task<IActionResult> deleteSalaryStructure(int SalaryStructureId)
+        {
+            try
+            {
+                var userId = await _payrollRepository.DeleteSalaryStructure(SalaryStructureId);
+                return Ok(new { message = "SalaryStructure deleted Succesfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "SalaryStructure delete error", error = ex.Message });
             }
         }
 
@@ -134,5 +149,112 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        [HttpGet("getPayrollbyUserId")]
+        public async Task<IActionResult> getPayrollbyUserId(int userId)
+        {
+            try
+            {
+                var data = await _payrollRepository.getPayrollbyUserId(userId);
+
+                if (data == null)
+                {
+                    return NotFound(new { success = false, message = "Payroll not found" });
+                }
+
+                return Ok(new
+                {
+                    message = "Payroll found",
+                    data
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = true,
+                    message = "Payroll not found",
+                    error = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("getPayrollbyPayrollId")]
+        public async Task<IActionResult> getPayrollbyPayrollId(int PayrollId)
+        {
+            try
+            {
+                var data = await _payrollRepository.getPayrollbyPayrollId(PayrollId);
+
+                if (data == null)
+                {
+                    return NotFound(new { success = false, message = "Payroll not found" });
+                }
+
+                return Ok(new
+                {
+                    message = "Payroll found",
+                    data
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = true,
+                    message = "Payroll not found",
+                    error = ex.Message
+                });
+            }
+        }
+
+        [HttpDelete("deletePayroll")]
+        public async Task<IActionResult> deletePayroll(int PayrollId)
+        {
+            try
+            {
+                var data = await _payrollRepository.deletePayroll(PayrollId);
+                return Ok(new { message = "Payroll deleted Succesfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Payroll delete error", error = ex.Message });
+            }
+        }
+
+        [HttpPost("generate-All-Payroll")]
+        public async Task<IActionResult> generateAllPayrollForUser(int month,int year)
+        {
+            try 
+            {
+                var data = await _payrollRepository.GeneratePayrollForAll(month, year);
+                if (data == null)
+                {
+                    return NotFound(new { success = false, message = "Payroll not generated" });
+                }
+                return Ok(new { message = "generated" });
+            } 
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error" , error=ex.Message});
+            }
+        }
+
+        [HttpGet("getAllPayrollByMonth")]
+        public async Task<IActionResult> getAllPayrollByMonth(int month)
+        {
+            try
+            {
+                var data = await _payrollRepository.GetAllPayrollByMonth(month);
+                if (data == null)
+                {
+                    return NotFound(new { success = false, message = "Payroll get error" });
+                }
+                return Ok(new { message = "payroll data", data });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error", error = ex.Message });
+            }
+        }
     }
 }
