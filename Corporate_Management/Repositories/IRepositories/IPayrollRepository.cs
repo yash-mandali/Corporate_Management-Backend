@@ -15,5 +15,6 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<int> deletePayroll(int PayrollId);
         Task<bool> GeneratePayrollForAll(int month, int year);
         Task<IEnumerable<getPayrollDataDto>> GetAllPayrollByMonth(int month);
+        Task<int> markAsPaid(int PayrollId);
     }
 }

@@ -227,5 +227,27 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
+        public async Task<int> markAsPaid(int PayrollId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@PayrollId", PayrollId);
+
+                var rows = await connection.ExecuteAsync(
+                    "sp_markAsPaid",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return rows;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

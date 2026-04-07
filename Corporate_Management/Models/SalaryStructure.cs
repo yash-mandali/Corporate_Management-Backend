@@ -54,12 +54,18 @@
         public int Month { get; set; }
         public int Year { get; set; }
         public decimal BasicSalary { get; set; }
-        public decimal OtherAllowance { get; set; }
+        public decimal Allowances { get; set; }
+        public decimal GrossSalary { get; set; }
+        public decimal PF { get; set; }
         public decimal TaxDeduction { get; set; }
-        public decimal OtherDeductions { get; set; }
+        public decimal UnpaidLeaveDays { get; set; }
+        public decimal LeaveDeduction { get; set; }
+        public decimal TotalDeductions { get; set; }
         public decimal NetSalary { get; set; }
         public string Status { get; set; }
         public DateTime GeneratedDate { get; set; }
+        public DateTime UpdatedDate { get; set; }
+        public DateTime PaidDate { get; set; }
     }
 
     public class getPayrollDataDto
@@ -71,9 +77,13 @@
         public int Month { get; set; }
         public int Year { get; set; }
         public decimal BasicSalary { get; set; }
-        public decimal OtherAllowance { get; set; }
+        public decimal Allowances { get; set; }
+        public decimal GrossSalary { get; set; }
+        public decimal PF { get; set; }
         public decimal TaxDeduction { get; set; }
-        public decimal OtherDeductions { get; set; }
+        public decimal UnpaidLeaveDays { get; set; }
+        public decimal LeaveDeduction { get; set; }
+        public decimal TotalDeductions { get; set; }
         public decimal NetSalary { get; set; }
         public string Status { get; set; }
         public DateTime GeneratedDate { get; set; }

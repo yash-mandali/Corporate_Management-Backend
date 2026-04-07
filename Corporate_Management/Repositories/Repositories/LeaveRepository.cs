@@ -1,6 +1,7 @@
 ﻿using Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
 using Dapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -34,9 +35,9 @@ namespace Corporate_Management.Repositories.Repositories
                 await connection.ExecuteAsync("sp_ApplyLeave", parameter, commandType: CommandType.StoredProcedure);
                 return parameter.Get<int>("@newId");
             }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
-                throw ex;
+                throw new Exception(ex.Message);
             }
         }
         public async Task<bool> UpdateLeave(int leaveId, updateLeaveDto leavemodel)
@@ -263,18 +264,24 @@ namespace Corporate_Management.Repositories.Repositories
 
         public async Task<bool> HrApproveLeave(int leaveId)
         {
-            using var connection = new SqlConnection(_connectionString);
+            try 
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@LeaveRequestId", leaveId);
 
-            var parameters = new DynamicParameters();
-            parameters.Add("@LeaveRequestId", leaveId);
+                var result = await connection.ExecuteAsync(
+                    "sp_HrApproveLeave",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
 
-            var result = await connection.ExecuteAsync(
-                "sp_HrApproveLeave",
-                parameters,
-                commandType: CommandType.StoredProcedure
-            );
-
-            return result > 0;
+                return true;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
         public async Task<bool> HrRejectLeave(int leaveId)
         {
@@ -290,6 +297,46 @@ namespace Corporate_Management.Repositories.Repositories
             );
 
             return result > 0;
+        }
+
+        public async Task<bool> InitilizeUsersLeaveBalance()
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var result = await connection.ExecuteAsync(
+               "sp_InitializeUserLeaveBalance",
+               commandType: CommandType.StoredProcedure
+           );
+
+                return true;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<IEnumerable<UserLeaveBalanceDto>> getUserLeaveBalance(int userId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@UserId", userId);
+
+                var result = await connection.QueryAsync<UserLeaveBalanceDto>(
+                    "sp_getUserLeaveBalance",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
     }

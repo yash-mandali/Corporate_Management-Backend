@@ -28,6 +28,8 @@ namespace Corporate_Management.Repositories.IRepositories
         //----------------------------------HR------------------------------------
         Task<bool> HrApproveLeave(int leaveId);
         Task<bool> HrRejectLeave(int leaveId);
+        Task<bool> InitilizeUsersLeaveBalance();
+        Task<IEnumerable<UserLeaveBalanceDto>> getUserLeaveBalance(int userId);
 
     }
 }

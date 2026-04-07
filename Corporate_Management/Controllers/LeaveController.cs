@@ -374,5 +374,53 @@ namespace Corporate_Management.Controllers
                 return BadRequest(new { message = "AutoLeave Rejecte failed", error = ex.Message });
             }
         }
+
+        [HttpPost("initializeUsersLeaveBalance")]
+        public async Task<IActionResult> InitializeLeaveBalance()
+        {
+            try
+            {
+                var result = await _leaveRepositories.InitilizeUsersLeaveBalance();
+
+                if (result)
+                {
+                    return Ok(new { message = "Leave balance initialized successfully." });
+                }
+
+                return BadRequest(new { message = "Initialization failed." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "An error occurred.",
+                    error = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("getUserLeaveBalance")]
+        public async Task<IActionResult> GetUserLeaveBalance(int userId)
+        {
+            try
+            {
+                var result = await _leaveRepositories.getUserLeaveBalance(userId);
+
+                if (result == null || !result.Any())
+                {
+                    return NotFound("No leave balance found.");
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Error retrieving leave balance",
+                    error = ex.Message
+                });
+            }
+        }
     }
 }

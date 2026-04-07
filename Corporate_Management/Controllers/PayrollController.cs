@@ -256,5 +256,19 @@ namespace Corporate_Management.Controllers
                 return BadRequest(new { message = "Error", error = ex.Message });
             }
         }
+
+        [HttpPost("markPayrollAsPaid")]
+        public async Task<IActionResult> MarkAsPaidPayroll(int PayrollId)
+        {
+            try
+            {
+                var data = await _payrollRepository.markAsPaid(PayrollId);
+                return Ok(new { message = "Payroll Mark as Paid" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Payroll Mark error", error = ex.Message });
+            }
+        }
     }
 }

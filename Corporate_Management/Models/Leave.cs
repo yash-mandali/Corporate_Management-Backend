@@ -43,4 +43,15 @@
         public string? Reason { get; set; }
         public string? HandoverTo { get; set; }
     }
+
+    public class UserLeaveBalanceDto
+    {
+        public int LeavebalanceId { get; set; }
+        public int UserId { get; set; }
+        public int Leavetype_Id { get; set; }
+        public decimal? TotalLeaveBalance { get; set; }
+        public decimal? UsedLeaveBalance { get; set; }
+        public decimal? RemainingLeaveBalance { get; set; }
+        public int Balance_year { get; set; }
+    }
 }
