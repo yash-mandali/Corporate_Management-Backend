@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<GetJwtToken>();
+builder.Services.AddScoped<IRecruitmentRepository, RecruitmentRepository>();
 builder.Services.AddScoped<IPayrollRepository,PayrollRepository>();
 builder.Services.AddScoped<ITimesheetRepository, TimesheetRepository>();
 builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
