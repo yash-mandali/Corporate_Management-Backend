@@ -58,6 +58,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+app.UseStaticFiles();
+
 
 if (app.Environment.IsDevelopment())
 {

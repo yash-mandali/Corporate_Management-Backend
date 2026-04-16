@@ -18,6 +18,12 @@ namespace Corporate_Management.Repositories.IRepositories
         Task LogoutUser(int userId);
         Task<IEnumerable<UserListDto>> GetEmployeeByDepartment(string department);
         Task<bool> AssignManagerAsync(int userId, int managerId);
+
+        //-------------------------------notification section-----------------------------------------
+        Task CreateNotification(string title, string message, string type, List<int> userIds);
+        Task<IEnumerable<dynamic>> GetUserNotifications(int userId);
+        Task MarkAsRead(int notificationId, int userId);
+
     }
 }
 

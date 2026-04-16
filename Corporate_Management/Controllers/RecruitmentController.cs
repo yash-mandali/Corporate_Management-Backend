@@ -215,23 +215,81 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        //[HttpPost("applyJob")]
+        //public async Task<IActionResult> ApplyJob(int jobId, int userId, string resumeurl)
+        //{
+        //    try
+        //    {
+        //        var result = await _recruitmentRepository.ApplyJob(jobId, userId, resumeurl);
+
+        //        if (result)
+        //        {
+        //            return Ok(new{success = true,message = "Applied for job successfully"});
+        //        }
+
+        //        return BadRequest(new{success = false,message = "Unable to apply for job"});
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new{success = false,message = ex.Message});
+        //    }
+        //}
+
         [HttpPost("applyJob")]
-        public async Task<IActionResult> ApplyJob(int jobId, int userId)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> ApplyJob([FromForm] ApplyJobRequest request)
         {
             try
             {
-                var result = await _recruitmentRepository.ApplyJob(jobId, userId);
 
-                if (result)
+                if (request.Resume == null || request.Resume.Length == 0)
+                    return BadRequest(new{message= "Resume file is required"});
+
+                if (request.Resume.Length > 5 * 1024 * 1024)
+                    return BadRequest(new { message = "File size should not exceed 5 MB" });
+
+                var allowedExtensions = new[] { ".pdf", ".doc", ".docx" };
+                var extension = Path.GetExtension(request.Resume.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(extension))
+                    return BadRequest(new{message="Only PDF, DOC, and DOCX files are allowed"});
+
+                var allowedMimeTypes = new[]
                 {
-                    return Ok(new{success = true,message = "Applied for job successfully"});
+                    "application/pdf",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                };
+
+                if (!allowedMimeTypes.Contains(request.Resume.ContentType))
+                    return BadRequest(new { message = "Invalid file type" });
+
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "resumes");
+
+                if (!Directory.Exists(uploadPath))
+                    Directory.CreateDirectory(uploadPath);
+
+                var fileName = $"{Guid.NewGuid()}{extension}";
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await request.Resume.CopyToAsync(stream);
                 }
 
-                return BadRequest(new{success = false,message = "Unable to apply for job"});
+                var dbPath = $"/uploads/resumes/{fileName}";
+
+                await _recruitmentRepository.ApplyJob(request.JobId, request.UserId, dbPath);
+
+                return Ok(new { message = "Applied successfully" });
             }
             catch (Exception ex)
             {
-                return BadRequest(new{success = false,message = ex.Message});
+                return StatusCode(500, new
+                {
+                    message = "Something went wrong",
+                    error = ex.Message
+                });
             }
         }
 

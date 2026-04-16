@@ -82,23 +82,81 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
+        //public async Task<int> PublishJobAsync(int jobId)
+        //{
+        //    try
+        //    {
+        //        using var connection = new SqlConnection(_connectionString);
+        //        var parameters = new DynamicParameters();
+        //        parameters.Add("@JobId", jobId);
+        //        parameters.Add("@ReturnVal", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+        //        await connection.ExecuteAsync("sp_PublishJob",parameters,commandType: CommandType.StoredProcedure);
+        //        return parameters.Get<int>("@ReturnVal");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
         public async Task<int> PublishJobAsync(int jobId)
         {
-            try
-            {
-                using var connection = new SqlConnection(_connectionString);
-                var parameters = new DynamicParameters();
-                parameters.Add("@JobId", jobId);
-                parameters.Add("@ReturnVal", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
-                await connection.ExecuteAsync("sp_PublishJob",parameters,commandType: CommandType.StoredProcedure);
-                return parameters.Get<int>("@ReturnVal");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
+            using var connection = new SqlConnection(_connectionString);
 
+            // 🔹 Step 1: Publish Job
+            var parameters = new DynamicParameters();
+            parameters.Add("@JobId", jobId);
+            parameters.Add("@ReturnVal", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+
+            await connection.ExecuteAsync(
+                "sp_PublishJob",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            var result = parameters.Get<int>("@ReturnVal");
+
+            // 👉 Only proceed if publish successful
+            if (result != 1)
+            {
+                return result;
+            }
+
+            // 🔹 Step 2: Get Job Title (optional but better UX)
+            var jobTitle = await connection.QuerySingleOrDefaultAsync<string>(
+                "SELECT Title FROM Jobs WHERE JobId = @JobId",
+                new { JobId = jobId }
+            );
+
+            // 🔹 Step 3: Get Users (Employee, Manager, Admin)
+            var userIds = await connection.QueryAsync<int>(
+                "SELECT Id FROM Users WHERE RoleId IN (1,2,3) AND IsDeleted = 0"
+            );
+
+            // 🔹 Step 4: Create Notification
+            var notificationId = await connection.QuerySingleAsync<int>(
+                "sp_CreateNotification",
+                new
+                {
+                    Title = "New Job Posted",
+                    Message = $"A new job '{jobTitle}' has been published",
+                    Type = "Job"
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            // 🔹 Step 5: Map to all users
+            foreach (var userId in userIds)
+            {
+                await connection.ExecuteAsync(
+                    "sp_InsertUserNotification",
+                    new { NotificationId = notificationId, UserId = userId },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+
+            return result;
+        }
         public async Task<JobModel> getJobById(int jobId)
         {
             try
@@ -173,30 +231,85 @@ namespace Corporate_Management.Repositories.Repositories
                 throw new Exception(ex.Message);
             }
         }
+        //public async Task<int> setStatusClosed(int jobId)
+        //{
+        //    try
+        //    {
+        //        using var connection = new SqlConnection(_connectionString);
+        //        var parameters = new DynamicParameters();
+        //        parameters.Add("@JobId", jobId);
+
+        //        var result = await connection.ExecuteAsync(
+        //        "sp_CloseJob",
+        //        parameters,
+        //        commandType: CommandType.StoredProcedure
+        //    );
+
+        //        return result;
+        //    }
+        //    catch (SqlException ex)
+        //    {
+        //        throw new Exception(ex.Message);
+        //    }
+        //}
 
         public async Task<int> setStatusClosed(int jobId)
         {
-            try
-            {
-                using var connection = new SqlConnection(_connectionString);
-                var parameters = new DynamicParameters();
-                parameters.Add("@JobId", jobId);
+            using var connection = new SqlConnection(_connectionString);
 
-                var result = await connection.ExecuteAsync(
+            // 🔹 Step 1: Close Job
+            var parameters = new DynamicParameters();
+            parameters.Add("@JobId", jobId);
+
+            var result = await connection.ExecuteAsync(
                 "sp_CloseJob",
                 parameters,
                 commandType: CommandType.StoredProcedure
             );
 
+            // 👉 Optional: ensure operation succeeded
+            if (result <= 0)
+            {
                 return result;
             }
-            catch (SqlException ex)
+
+            // 🔹 Step 2: Get Job Title
+            var jobTitle = await connection.QuerySingleOrDefaultAsync<string>(
+                "SELECT Title FROM Jobs WHERE JobId = @JobId",
+                new { JobId = jobId }
+            );
+
+            // 🔹 Step 3: Get Users (Employee, Manager, Admin)
+            var userIds = await connection.QueryAsync<int>(
+                "SELECT Id FROM Users WHERE RoleId IN (1,2,3) AND IsDeleted = 0"
+            );
+
+            // 🔹 Step 4: Create Notification
+            var notificationId = await connection.QuerySingleAsync<int>(
+                "sp_CreateNotification",
+                new
+                {
+                    Title = "Job Closed",
+                    Message = $"The job '{jobTitle}' is now closed",
+                    Type = "Job"
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            // 🔹 Step 5: Map to Users
+            foreach (var userId in userIds)
             {
-                throw new Exception(ex.Message);
+                await connection.ExecuteAsync(
+                    "sp_InsertUserNotification",
+                    new { NotificationId = notificationId, UserId = userId },
+                    commandType: CommandType.StoredProcedure
+                );
             }
+
+            return result;
         }
 
-        public async Task<bool> ApplyJob(int jobId, int userId)
+        public async Task<bool> ApplyJob(int jobId, int userId, string resumeurl)
         {
             try
             {
@@ -205,6 +318,7 @@ namespace Corporate_Management.Repositories.Repositories
                 var parameters = new DynamicParameters();
                 parameters.Add("@JobId", jobId);
                 parameters.Add("@UserId", userId);
+                parameters.Add("@ResumeUrl", resumeurl);
 
                 var result = await connection.ExecuteAsync(
                     "sp_ApplyJob",
@@ -214,9 +328,9 @@ namespace Corporate_Management.Repositories.Repositories
 
                 return true; 
             }
-            catch (SqlException ex)
+            catch (SqlException)
             {
-                throw new Exception(ex.Message);
+                throw; 
             }
         }
 

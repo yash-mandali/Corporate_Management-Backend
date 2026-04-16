@@ -141,24 +141,54 @@ namespace Corporate_Management.Repositories.Repositories
 
         public async Task<int> SubmitTimesheetEntry(int sheetId)
         {
-            try
-            {
-                using var connection = new SqlConnection(_connectionString);
-                var parameters = new DynamicParameters();
-                parameters.Add("@sheetId", sheetId);
+            using var connection = new SqlConnection(_connectionString);
 
-                var rows = await connection.ExecuteAsync(
-                    "sp_SubmitTimesheet",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
+            var parameters = new DynamicParameters();
+            parameters.Add("@sheetId", sheetId);
 
-                return rows;
-            }
-            catch (Exception)
+            var rows = await connection.ExecuteAsync(
+                "sp_SubmitTimesheet",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            var userId = await connection.QuerySingleAsync<int>(
+                "SELECT UserId FROM TimesheetEntries WHERE TimeSheetId = @sheetId",
+                new { sheetId }
+            );
+
+            var userName = await connection.QuerySingleAsync<string>(
+                "SELECT Username FROM Users WHERE Id = @Id AND IsDeleted = 0",
+                new { Id = userId }
+            );
+
+            var managerId = await connection.QuerySingleOrDefaultAsync<int?>(
+                "SELECT ManagerId FROM Users WHERE Id = @Id AND IsDeleted = 0",
+                new { Id = userId }
+            );
+            if (managerId == null)
             {
-                throw;
+                throw new Exception("Manager not assigned to this user.");
             }
+
+            var notificationId = await connection.QuerySingleAsync<int>(
+                "sp_CreateNotification",
+                new
+                {
+                    Title = "Timesheet Submitted",
+                    Message = $"{userName} submitted timesheet",
+                    Type = "Timesheet"
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            await connection.ExecuteAsync(
+                "sp_InsertUserNotification",
+                new { NotificationId = notificationId, UserId = managerId },
+                commandType: CommandType.StoredProcedure
+            );
+
+            return rows;
         }
 
         public async Task<IEnumerable<Timesheet>> getTimesheetByStatus(string status)
@@ -183,45 +213,107 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
+        
         //----------------------------------Manager-------------------------------
 
         public async Task<int> ApproveByManager(int sheetId)
         {
-            try
-            {
-                using var connection = new SqlConnection(_connectionString);
-                var parameters = new DynamicParameters();
-                parameters.Add("@sheetId", sheetId);
+            using var connection = new SqlConnection(_connectionString);
 
-                var rows = await connection.ExecuteAsync(
-                    "sp_ManagerApproveTimesheet",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
+            var parameters = new DynamicParameters();
+            parameters.Add("@sheetId", sheetId);
 
-                return rows;
-            }
-            catch (Exception)
+            var rows = await connection.ExecuteAsync(
+                "sp_ManagerApproveTimesheet",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            var userId = await connection.QuerySingleOrDefaultAsync<int?>(
+                "SELECT UserId FROM TimesheetEntries WHERE TimeSheetId = @sheetId",
+                new { sheetId }
+            );
+
+            if (!userId.HasValue)
             {
-                throw;
+                throw new Exception("Timesheet not found.");
             }
+
+            var userName = await connection.QuerySingleAsync<string>(
+                "SELECT Username FROM Users WHERE Id = @Id AND IsDeleted = 0",
+                new { Id = userId.Value }
+            );
+
+            var notificationId = await connection.QuerySingleAsync<int>(
+                "sp_CreateNotification",
+                new
+                {
+                    Title = "Timesheet Approved",
+                    Message = $"Timesheet was approved by manager.",
+                    Type = "Timesheet"
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            await connection.ExecuteAsync(
+                "sp_InsertUserNotification",
+                new
+                {
+                    NotificationId = notificationId,
+                    UserId = userId.Value
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            return rows;
         }
 
         public async Task<int> RejectByManager(int sheetId, string reason)
         {
-            try
+            using var connection = new SqlConnection(_connectionString);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@sheetId", sheetId);
+            parameters.Add("@RejectReason", reason);
+
+            var rows = await connection.ExecuteAsync(
+                "sp_ManagerRejectTimesheet",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            var userId = await connection.QuerySingleOrDefaultAsync<int?>(
+                "SELECT UserId FROM TimesheetEntries WHERE TimeSheetId = @sheetId",
+                new { sheetId }
+            );
+
+            if (!userId.HasValue)
             {
-                using var connection = new SqlConnection(_connectionString);
-                var parameters = new DynamicParameters();
-                parameters.Add("@sheetId", sheetId);
-                parameters.Add("@RejectReason", reason);
-                var rows = await connection.ExecuteAsync("sp_ManagerRejectTimesheet", parameters, commandType: CommandType.StoredProcedure);
-                return rows;
+                throw new Exception("Timesheet not found.");
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            var notificationId = await connection.QuerySingleAsync<int>(
+                "sp_CreateNotification",
+                new
+                {
+                    Title = "Timesheet Rejected",
+                    Message = $"Timesheet was rejected by manager.",
+                    Type = "Timesheet"
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            await connection.ExecuteAsync(
+                "sp_InsertUserNotification",
+                new
+                {
+                    NotificationId = notificationId,
+                    UserId = userId.Value
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            return rows;
         }
 
         public async Task<IEnumerable<Timesheet>> GetManagerTeamTimesheets(int managerId)
@@ -245,7 +337,5 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
-
- 
     }
 }

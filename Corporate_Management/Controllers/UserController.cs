@@ -1,6 +1,7 @@
 ﻿using Corporate_Management.DTOs;
 using Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -266,6 +267,40 @@ namespace Corporate_Management.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = "failed", error = ex.Message });
+            }
+        }
+
+        //----------------notifications-----------------
+
+        [HttpGet("getUsersNotifications")]
+        public async Task<IActionResult> GetNotifications(int userId)
+        {
+            try
+            {
+                var data = await _userRepositories.GetUserNotifications(userId);
+
+                if (data == null)
+                    return NotFound(new { message = "notifications not found" });
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error retrieving notifications", error = ex.Message });
+            }
+        }
+
+        [HttpPost("MarkAsReadNotifications")]
+        public async Task<IActionResult> MarkAsRead(int notificationId, int userId)
+        {
+            try
+            {
+                await _userRepositories.MarkAsRead(notificationId, userId);
+                return Ok(new {message="notification mark as read"});
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error retrieving notifications", error = ex.Message });
             }
         }
     }

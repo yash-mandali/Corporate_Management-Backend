@@ -44,10 +44,18 @@
         public string FullName { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
+        public string ResumeUrl { get; set; }
         public string gender { get; set; }
         public string address { get; set; }
         public string department { get; set; }
         public string ApplicationStatus { get; set; }
         public DateTime AppliedDate { get; set; }
+    }
+
+    public class ApplyJobRequest
+    {
+        public int JobId { get; set; }
+        public int UserId { get; set; }
+        public IFormFile Resume { get; set; }
     }
 }

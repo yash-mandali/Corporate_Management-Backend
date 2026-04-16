@@ -16,29 +16,87 @@ namespace Corporate_Management.Repositories.Repositories
             _connectionString = config.GetConnectionString("dbconnection");
         }
 
+        //public async Task<int> CreateLeave(Leave leavemodel)
+        //{
+        //    try 
+        //    {
+        //        using var connection = new SqlConnection(_connectionString);
+        //        var parameter = new DynamicParameters();
+        //        parameter.Add("@UserId", leavemodel.UserId);    
+        //        parameter.Add("@RequestType", leavemodel.RequestType);
+        //        parameter.Add("@FromDate", leavemodel.FromDate.ToDateTime(TimeOnly.MinValue));
+        //        parameter.Add("@ToDate", leavemodel.ToDate.ToDateTime(TimeOnly.MinValue));
+        //        parameter.Add("@Session", leavemodel.Session);
+        //        parameter.Add("@Reason", leavemodel.Reason);
+        //        parameter.Add("@HandoverTo", leavemodel.HandoverTo);
+        //        //parameter.Add("@Status", leavemodel.Status ?? "Pending" );
+        //        parameter.Add("@newId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+
+        //        await connection.ExecuteAsync("sp_ApplyLeave", parameter, commandType: CommandType.StoredProcedure);
+        //        return parameter.Get<int>("@newId");
+        //    }
+        //    catch (SqlException ex)
+        //    {
+        //        throw new Exception(ex.Message);
+        //    }
+        //}
+
         public async Task<int> CreateLeave(Leave leavemodel)
         {
-            try 
-            {
-                using var connection = new SqlConnection(_connectionString);
-                var parameter = new DynamicParameters();
-                parameter.Add("@UserId", leavemodel.UserId);    
-                parameter.Add("@RequestType", leavemodel.RequestType);
-                parameter.Add("@FromDate", leavemodel.FromDate.ToDateTime(TimeOnly.MinValue));
-                parameter.Add("@ToDate", leavemodel.ToDate.ToDateTime(TimeOnly.MinValue));
-                parameter.Add("@Session", leavemodel.Session);
-                parameter.Add("@Reason", leavemodel.Reason);
-                parameter.Add("@HandoverTo", leavemodel.HandoverTo);
-                //parameter.Add("@Status", leavemodel.Status ?? "Pending" );
-                parameter.Add("@newId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+            using var connection = new SqlConnection(_connectionString);
 
-                await connection.ExecuteAsync("sp_ApplyLeave", parameter, commandType: CommandType.StoredProcedure);
-                return parameter.Get<int>("@newId");
-            }
-            catch (SqlException ex)
+            var parameter = new DynamicParameters();
+            parameter.Add("@UserId", leavemodel.UserId);
+            parameter.Add("@RequestType", leavemodel.RequestType);
+            parameter.Add("@FromDate", leavemodel.FromDate.ToDateTime(TimeOnly.MinValue));
+            parameter.Add("@ToDate", leavemodel.ToDate.ToDateTime(TimeOnly.MinValue));
+            parameter.Add("@Session", leavemodel.Session);
+            parameter.Add("@Reason", leavemodel.Reason);
+            parameter.Add("@HandoverTo", leavemodel.HandoverTo);
+            parameter.Add("@newId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+
+            await connection.ExecuteAsync(
+                "sp_ApplyLeave",
+                parameter,
+                commandType: CommandType.StoredProcedure
+            );
+
+            var leaveId = parameter.Get<int>("@newId");
+
+            var userName = await connection.QuerySingleAsync<string>(
+                "SELECT Username FROM Users WHERE Id = @Id AND IsDeleted = 0",
+                new { Id = leavemodel.UserId }
+            );
+
+            var userIds = await connection.QueryAsync<int>(
+                "SELECT Id FROM Users WHERE RoleId IN (1,3,4) AND IsDeleted = 0"
+            );
+
+            var notificationId = await connection.QuerySingleAsync<int>(
+                "sp_CreateNotification",
+                new
+                {
+                    Title = "Leave Applied",
+                    Message = $"{userName} applied for leave from {leavemodel.FromDate:dd MMM yyyy} to {leavemodel.ToDate:dd MMM yyyy}",
+                    Type = "Leave"
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            foreach (var userId in userIds)
             {
-                throw new Exception(ex.Message);
+                await connection.ExecuteAsync(
+                    "sp_InsertUserNotification",
+                    new
+                    {
+                        NotificationId = notificationId,
+                        UserId = userId
+                    },
+                    commandType: CommandType.StoredProcedure
+                );
             }
+
+            return leaveId;
         }
         public async Task<bool> UpdateLeave(int leaveId, updateLeaveDto leavemodel)
         {

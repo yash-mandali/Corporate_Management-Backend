@@ -234,5 +234,84 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
+
+
+        //-------------------------------notification section-----------------------------------------
+
+        public async Task CreateNotification(string title, string message, string type, List<int> userIds)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            // Step 1: Create Notification
+            var notificationId = await connection.QuerySingleAsync<int>(
+                "sp_CreateNotification",
+                new { Title = title, Message = message, Type = type },
+                commandType: CommandType.StoredProcedure
+            );
+
+            // Step 2: Map Users
+            foreach (var userId in userIds)
+            {
+                await connection.ExecuteAsync(
+                    "sp_InsertUserNotification",
+                    new { NotificationId = notificationId, UserId = userId },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+        }
+
+        public async Task<List<int>> GetUsersByRoles(List<int> roleIds)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var users = await connection.QueryAsync<int>(
+                    "SELECT Id FROM Users WHERE RoleId IN @RoleIds AND IsDeleted = 0",
+                    new { RoleIds = roleIds }
+                );
+
+                return users.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+        public async Task<IEnumerable<dynamic>> GetUserNotifications(int userId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var data = await connection.QueryAsync(
+                    "sp_GetUserNotifications",
+                    new { UserId = userId },
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task MarkAsRead(int notificationId, int userId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                await connection.ExecuteAsync(
+                    "sp_MarkNotificationAsRead",
+                    new { NotificationId = notificationId, UserId = userId },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
