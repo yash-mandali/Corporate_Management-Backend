@@ -1,7 +1,6 @@
 ﻿using Corporate_Management.DTOs;
 using Corporate_Management.Models;
 using Dapper;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -15,7 +14,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
             _connectionString = config.GetConnectionString("dbconnection");
         }
        
-
         public async Task<int> AddUserAsync(RegisterDto userDto)
         {
             try
@@ -40,7 +38,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw ex;
             }
         }   
-
         public async Task<int> UpdateUserAsync(UpdateUserDto userDto)
         {
             try
@@ -64,7 +61,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
-
         public async Task<int> DeleteUserAsync(int id)
         {
             try
@@ -81,7 +77,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
-
         public async Task<UserListDto> GetUserByIdAsync(int id)
         {
             try
@@ -98,7 +93,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
-
         public async Task<IEnumerable<UserListDto>> GetAllUserAsync()
         {
             try
@@ -125,7 +119,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
-
         public async Task<IEnumerable<UserListDto>> GetAllEmployeeAsync()
         {
             try
@@ -139,7 +132,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
-
         public async Task<IEnumerable<UserListDto>> GetAllManagerAsync()
         {
             try
@@ -153,7 +145,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
-
         public async Task<User> LoginUser(LoginDto logindto)
         {
             using var connection = new SqlConnection(_connectionString);
@@ -177,7 +168,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
 
             return user;
         }
-
         public async Task LogoutUser(int userId)
         {
             using var connection = new SqlConnection(_connectionString);
@@ -191,7 +181,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 commandType: CommandType.StoredProcedure
             );
         }
-
         public async Task<IEnumerable<UserListDto>> GetManagerTeam(int managerId)
         {
             try
@@ -208,7 +197,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
-
         public async Task<IEnumerable<UserListDto>> GetEmployeeByDepartment(string department)
         {
             try
@@ -225,7 +213,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw;
             }
         }
-
         public async Task<bool> AssignManagerAsync(int userId, int managerId)
         {
             try 

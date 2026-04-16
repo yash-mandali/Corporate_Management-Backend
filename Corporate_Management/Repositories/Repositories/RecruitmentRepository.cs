@@ -4,6 +4,7 @@ using Corporate_Management.Repositories.IRepositories;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Globalization;
 
 namespace Corporate_Management.Repositories.Repositories
 {
@@ -78,6 +79,167 @@ namespace Corporate_Management.Repositories.Repositories
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        public async Task<int> PublishJobAsync(int jobId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@JobId", jobId);
+                parameters.Add("@ReturnVal", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+                await connection.ExecuteAsync("sp_PublishJob",parameters,commandType: CommandType.StoredProcedure);
+                return parameters.Get<int>("@ReturnVal");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<JobModel> getJobById(int jobId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+
+                var parameter = new DynamicParameters();
+                parameter.Add("@JobId", jobId);
+
+                var data = await connection.QueryFirstOrDefaultAsync<JobModel>("sp_GetJobById", parameter, commandType: CommandType.StoredProcedure);
+                return data;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateJobAsync(int jobId, UpdateJobDto dto)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@JobId", jobId);
+                parameters.Add("@Title", dto.Title);
+                parameters.Add("@Description", dto.Description);
+                parameters.Add("@Department", dto.Department);
+                parameters.Add("@Location", dto.Location);
+                parameters.Add("@Employment_type", dto.Employment_type);
+                parameters.Add("@Experience_required", dto.Experience_required);
+                parameters.Add("@Vacancies", dto.Vacancies);
+                parameters.Add("@Required_skills", dto.Required_skills);
+                parameters.Add("@Qualifications", dto.Qualifications);
+                parameters.Add("@Responsibilities", dto.Responsibilities);
+                parameters.Add("@Salary_min", dto.Salary_min);
+                parameters.Add("@Salary_max", dto.Salary_max);
+                parameters.Add("@Currency", dto.Currency);
+                parameters.Add("@Application_deadline", dto.Application_deadline);
+
+                var result = await connection.ExecuteAsync(
+                    "sp_UpdateJob",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+                return result > 0;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<int> setStatusOnHold(int jobId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@JobId", jobId);
+
+                var result = await connection.ExecuteAsync(
+                "sp_OnHoldJob",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+                return  result;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<int> setStatusClosed(int jobId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@JobId", jobId);
+
+                var result = await connection.ExecuteAsync(
+                "sp_CloseJob",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+                return result;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<bool> ApplyJob(int jobId, int userId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@JobId", jobId);
+                parameters.Add("@UserId", userId);
+
+                var result = await connection.ExecuteAsync(
+                    "sp_ApplyJob",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return true; 
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<IEnumerable<CandidateDto>> GetCandidatesByJobId(int jobId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@JobId", jobId);
+
+                var result = await connection.QueryAsync<CandidateDto>(
+                    "sp_GetCandidatesByJobId",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }

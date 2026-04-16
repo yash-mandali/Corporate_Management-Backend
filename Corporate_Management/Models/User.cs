@@ -1,4 +1,6 @@
-﻿namespace Corporate_Management.Models
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace Corporate_Management.Models
 {
     public class User
     {
@@ -12,8 +14,11 @@
         public string RoleId { get; set; }
         public string RoleName { get; set; }
         public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime DeletedAt { get; set; }
     }
+
     public class UserListDto
     {
         public int Id { get; set; }
