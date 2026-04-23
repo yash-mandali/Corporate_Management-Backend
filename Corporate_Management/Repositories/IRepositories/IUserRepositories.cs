@@ -11,6 +11,7 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<UserListDto> GetUserByIdAsync(int id);
         Task<IEnumerable<UserListDto>> GetManagerTeam(int managerId);
         Task<IEnumerable<UserListDto>> GetAllUserAsync();
+        Task<IEnumerable<UserListDto>> GetAllEmployeeManagerHr();
         Task<IEnumerable<UserListDto>> GetAllEmployeeManagers();
         Task<IEnumerable<UserListDto>> GetAllEmployeeAsync();
         Task<IEnumerable<UserListDto>> GetAllManagerAsync();
@@ -23,6 +24,13 @@ namespace Corporate_Management.Repositories.IRepositories
         Task CreateNotification(string title, string message, string type, List<int> userIds);
         Task<IEnumerable<dynamic>> GetUserNotifications(int userId);
         Task MarkAsRead(int notificationId, int userId);
+        Task<bool> MarkAllAsRead(int userId);
+
+        //-----------------------------forgot password section--------------
+
+        Task<bool> VerifyEmailAndSendOtp(string email);
+        Task<bool> VerifyOtp(string email, string otp);
+        Task<bool> changePassword(string email, string newPassword);
 
     }
 }

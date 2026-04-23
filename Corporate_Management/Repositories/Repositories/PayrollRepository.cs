@@ -107,31 +107,83 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
+        //public async Task<int> GeneratePayroll(GeneratePayroll model)
+        //{
+        //    try
+        //    {
+        //        using var connection = new SqlConnection(_connectionString);
+
+        //        var parameter = new DynamicParameters();
+        //        parameter.Add("@UserId", model.UserId);
+        //        parameter.Add("@Month", model.Month);
+        //        parameter.Add("@Year", model.Year);
+        //        parameter.Add("@TaxDeduction ", model.TaxDeduction);
+        //        parameter.Add("@newId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+
+        //        await connection.ExecuteAsync(
+        //            "sp_GeneratePayroll",
+        //            parameter,
+        //            commandType: CommandType.StoredProcedure
+        //        );
+
+        //        return parameter.Get<int>("@newId");
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
         public async Task<int> GeneratePayroll(GeneratePayroll model)
         {
-            try
-            {
-                using var connection = new SqlConnection(_connectionString);
+            using var connection = new SqlConnection(_connectionString);
 
-                var parameter = new DynamicParameters();
-                parameter.Add("@UserId", model.UserId);
-                parameter.Add("@Month", model.Month);
-                parameter.Add("@Year", model.Year);
-                parameter.Add("@TaxDeduction ", model.TaxDeduction);
-                parameter.Add("@newId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+            // 🔹 Step 1: Generate Payroll
+            var parameter = new DynamicParameters();
+            parameter.Add("@UserId", model.UserId);
+            parameter.Add("@Month", model.Month);
+            parameter.Add("@Year", model.Year);
+            parameter.Add("@TaxDeduction", model.TaxDeduction); // ✅ fixed
+            parameter.Add("@newId", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
-                await connection.ExecuteAsync(
-                    "sp_GeneratePayroll",
-                    parameter,
-                    commandType: CommandType.StoredProcedure
-                );
+            await connection.ExecuteAsync(
+                "sp_GeneratePayroll",
+                parameter,
+                commandType: CommandType.StoredProcedure
+            );
 
-                return parameter.Get<int>("@newId");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            var payrollId = parameter.Get<int>("@newId");
+
+            // 🔹 Step 2: Get Username
+            var userName = await connection.QuerySingleAsync<string>(
+                "SELECT Username FROM Users WHERE Id = @Id AND IsDeleted = 0",
+                new { Id = model.UserId }
+            );
+
+            // 🔹 Step 3: Create Notification
+            var notificationId = await connection.QuerySingleAsync<int>(
+                "sp_CreateNotification",
+                new
+                {
+                    Title = "Payroll Generated",
+                    Message = $"Your salary for {model.Month}/{model.Year} has been generated",
+                    Type = "Payroll"
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            // 🔹 Step 4: Send ONLY to that user
+            await connection.ExecuteAsync(
+                "sp_InsertUserNotification",
+                new
+                {
+                    NotificationId = notificationId,
+                    UserId = model.UserId
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            return payrollId;
         }
 
         public async Task<getPayrollData> getPayrollbyUserId(int userId)
@@ -227,27 +279,83 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
+        //public async Task<int> markAsPaid(int PayrollId)
+        //{
+        //    try
+        //    {
+        //        using var connection = new SqlConnection(_connectionString);
+        //        var parameters = new DynamicParameters();
+        //        parameters.Add("@PayrollId", PayrollId);
+
+        //        var rows = await connection.ExecuteAsync(
+        //            "sp_markAsPaid",
+        //            parameters,
+        //            commandType: CommandType.StoredProcedure
+        //        );
+
+        //        return rows;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
         public async Task<int> markAsPaid(int PayrollId)
         {
-            try
-            {
-                using var connection = new SqlConnection(_connectionString);
-                var parameters = new DynamicParameters();
-                parameters.Add("@PayrollId", PayrollId);
+            using var connection = new SqlConnection(_connectionString);
 
-                var rows = await connection.ExecuteAsync(
-                    "sp_markAsPaid",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
+            // 🔹 Step 1: Mark as Paid
+            var parameters = new DynamicParameters();
+            parameters.Add("@PayrollId", PayrollId);
 
-                return rows;
-            }
-            catch (Exception)
+            var rows = await connection.ExecuteAsync(
+                "sp_markAsPaid",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            // 🔹 Step 2: Get UserId from Payroll
+            var userId = await connection.QuerySingleOrDefaultAsync<int?>(
+                "SELECT UserId FROM Payroll WHERE PayrollId = @PayrollId",
+                new { PayrollId }
+            );
+
+            if (!userId.HasValue)
             {
-                throw;
+                throw new Exception("Payroll record not found.");
             }
+
+            // 🔹 Step 3: Get Username (optional)
+            var userName = await connection.QuerySingleAsync<string>(
+                "SELECT Username FROM Users WHERE Id = @Id AND IsDeleted = 0",
+                new { Id = userId.Value }
+            );
+
+            // 🔹 Step 4: Create Notification
+            var notificationId = await connection.QuerySingleAsync<int>(
+                "sp_CreateNotification",
+                new
+                {
+                    Title = "Salary Paid",
+                    Message = $"Your salary has been credited successfully",
+                    Type = "Payroll"
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            // 🔹 Step 5: Send ONLY to that user
+            await connection.ExecuteAsync(
+                "sp_InsertUserNotification",
+                new
+                {
+                    NotificationId = notificationId,
+                    UserId = userId.Value
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            return rows;
         }
-
     }
 }

@@ -2,10 +2,8 @@
 using Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
 using Dapper;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using System.Reflection.Metadata;
 
 namespace Corporate_Management.Repositories.Repositories
 {
@@ -15,7 +13,6 @@ namespace Corporate_Management.Repositories.Repositories
         public AttendanceRepository(IConfiguration config)
         {
             _connectionString = config.GetConnectionString("dbconnection");
-
 
         }
 

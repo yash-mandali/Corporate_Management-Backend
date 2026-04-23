@@ -2,15 +2,15 @@ using Corporate_Management;
 using Corporate_Management.Repositories.IRepositories;
 using Corporate_Management.Repositories.IRepositories.Repositories;
 using Corporate_Management.Repositories.Repositories;
+using Corporate_Management.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
+builder.Services.AddScoped<EmailOtpService>();
 builder.Services.AddScoped<GetJwtToken>();
 builder.Services.AddScoped<IRecruitmentRepository, RecruitmentRepository>();
 builder.Services.AddScoped<IPayrollRepository,PayrollRepository>();
@@ -18,7 +18,6 @@ builder.Services.AddScoped<ITimesheetRepository, TimesheetRepository>();
 builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<IUserRepositories, UserRepositories>();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 builder.Services.AddCors(options =>

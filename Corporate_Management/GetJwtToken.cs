@@ -9,7 +9,6 @@ namespace Corporate_Management
     public class GetJwtToken
     {
         private readonly IConfiguration _config;
-
         public GetJwtToken(IConfiguration config)
         {
             _config = config;

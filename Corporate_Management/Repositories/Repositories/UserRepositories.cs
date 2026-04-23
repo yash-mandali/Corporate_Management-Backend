@@ -1,6 +1,10 @@
-﻿using Corporate_Management.DTOs;
+﻿using Azure.Core;
+using Corporate_Management.DTOs;
 using Corporate_Management.Models;
+using Corporate_Management.Services;
 using Dapper;
+using DocumentFormat.OpenXml.EMMA;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -9,9 +13,11 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
     public class UserRepositories : IUserRepositories
     {
         private readonly string _connectionString;
-        public UserRepositories(IConfiguration config)
+        private readonly EmailOtpService _emailService;
+        public UserRepositories(IConfiguration config, EmailOtpService emailService)
         {
             _connectionString = config.GetConnectionString("dbconnection");
+            _emailService = emailService;
         }
        
         public async Task<int> AddUserAsync(RegisterDto userDto)
@@ -99,6 +105,19 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
             {
                 using var connection = new SqlConnection(_connectionString);
                 var Users = await connection.QueryAsync<UserListDto>("sp_GetAllUsers", commandType: CommandType.StoredProcedure);
+                return Users;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<IEnumerable<UserListDto>> GetAllEmployeeManagerHr()
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var Users = await connection.QueryAsync<UserListDto>("sp_getAllEmployeeManagerHr", commandType: CommandType.StoredProcedure);
                 return Users;
             }
             catch (Exception)
@@ -311,6 +330,101 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        // Repository Method
+        public async Task<bool> MarkAllAsRead(int userId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@UserId", userId);
+
+                var rows = await connection.ExecuteAsync(
+                    "sp_MarkAllAsRead",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return rows >= 0;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        //---------------------forgot password section-------------------------
+        public async Task<bool> VerifyEmailAndSendOtp(string email)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@Email", email);
+
+                // Call Stored Procedure
+                var user = await connection.QueryFirstOrDefaultAsync<dynamic>(
+                    "sp_VerifyEmailForOtp",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                if (user == null)
+                    return false;
+
+                string otp = _emailService.GenerateOTP();
+                string userName = user.UserName;
+
+                bool isSent = await _emailService.sendOtpEmail(email, otp, userName);
+                if (!isSent)
+                    return false;
+
+                await connection.ExecuteAsync("sp_SaveEmailOtp",new{Email = email,OtpCode = otp},commandType: CommandType.StoredProcedure);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<bool> VerifyOtp(string email, string otp)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@Email", email);
+                parameters.Add("@OtpCode", otp);
+                await connection.ExecuteAsync("sp_VerifyEmailOtp", parameters,commandType: CommandType.StoredProcedure);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<bool> changePassword(string email, string newPassword)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@Email", email);
+                parameters.Add("@Password", BCrypt.Net.BCrypt.HashPassword(newPassword));
+
+                var rows = await connection.ExecuteAsync("sp_changePassword", parameters,commandType: CommandType.StoredProcedure);
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }

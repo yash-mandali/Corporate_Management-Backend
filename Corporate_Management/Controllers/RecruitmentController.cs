@@ -178,40 +178,89 @@ namespace Corporate_Management.Controllers
         }
 
         [HttpPost("OnHold")]
-        public async Task<IActionResult> setStatusOnHold(int jobId)
+        public async Task<IActionResult> OnHoldJob(int jobId)
         {
             try
             {
                 var result = await _recruitmentRepository.setStatusOnHold(jobId);
-
-                if (result == null)
+                if (result == 1)
                 {
-                    return BadRequest(new { message = "failed to change status" });
+                    return Ok(new { success = true, message = "Job put OnHold" });
                 }
-                return Ok(new { message = "status changed", attendanceId = result });
+
+                if (result == 0)
+                {
+                    return BadRequest(new { success = false, message = "Job is already closed or deleted" });
+                }
+
+                if (result == -1)
+                {
+                    return NotFound(new { success = false, message = "Job not found" });
+                }
+
+                return StatusCode(500, new { success = false, message = "Unexpected error" });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = "status change failed", error = ex.Message });
+                return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
 
-        [HttpPost("closed")]
-        public async Task<IActionResult> setStatusClosed(int jobId)
+        [HttpPost("openJob")]
+        public async Task<IActionResult> openJob(int jobId)
         {
             try
             {
                 var result = await _recruitmentRepository.setStatusClosed(jobId);
-
-                if (result == null)
+                if (result == 1)
                 {
-                    return BadRequest(new { message = "failed to change status" });
+                    return Ok(new { success = true, message = "Job opened" });
                 }
-                return Ok(new { message = "status changed", attendanceId = result });
+
+                if (result == 0)
+                {
+                    return BadRequest(new { success = false, message = "Job is already closed or deleted" });
+                }
+
+                if (result == -1)
+                {
+                    return NotFound(new { success = false, message = "Job not found" });
+                }
+
+                return StatusCode(500, new { success = false, message = "Unexpected error" });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = "status change failed", error = ex.Message });
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost("closeJob")]
+        public async Task<IActionResult> CloseJob(int jobId)
+        {
+            try
+            {
+                var result = await _recruitmentRepository.setStatusClosed(jobId);
+                if (result == 1)
+                {
+                    return Ok(new { success = true, message = "Job closed successfully" });
+                }
+
+                if (result == 0)
+                {
+                    return BadRequest(new { success = false, message = "Job is already closed or deleted" });
+                }
+
+                if (result == -1)
+                {
+                    return NotFound(new { success = false, message = "Job not found" });
+                }
+
+                return StatusCode(500, new { success = false, message = "Unexpected error" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
 

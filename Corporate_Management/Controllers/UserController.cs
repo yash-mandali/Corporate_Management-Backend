@@ -106,6 +106,25 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        [HttpGet("getAllEmployeeManagerHr")]
+        public async Task<IActionResult> GetAllEmployeeManagerHr()
+        {
+            try
+            {
+                var user = await _userRepositories.GetAllEmployeeManagerHr();
+
+                if (user == null)
+                    return NotFound(new { message = "users not found" });
+
+                return Ok(user);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error retrieving users", error = ex.Message });
+            }
+        }
+
         [HttpGet("getAllEmployeeManager")]
         public async Task<IActionResult> getAllEmployeeManager()
         {
@@ -271,7 +290,7 @@ namespace Corporate_Management.Controllers
         }
 
         //----------------notifications-----------------
-
+ 
         [HttpGet("getUsersNotifications")]
         public async Task<IActionResult> GetNotifications(int userId)
         {
@@ -288,7 +307,7 @@ namespace Corporate_Management.Controllers
             {
                 return BadRequest(new { message = "Error retrieving notifications", error = ex.Message });
             }
-        }
+        }                                                                                                                                                                                                                                                                                    
 
         [HttpPost("MarkAsReadNotifications")]
         public async Task<IActionResult> MarkAsRead(int notificationId, int userId)
@@ -301,6 +320,100 @@ namespace Corporate_Management.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = "Error retrieving notifications", error = ex.Message });
+            }
+        }
+
+        [HttpPut("MarkAllasRead")]
+        public async Task<IActionResult> MarkAllAsRead(int userId)
+        {
+            try
+            {
+                var result = await _userRepositories.MarkAllAsRead(userId);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "All notifications marked as read."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        //----------------forgot password section-----------------
+
+        [HttpPost("SendForgotPasswordOtp")]
+        public async Task<IActionResult> SendForgotPasswordOtp(string email)
+        {
+            try
+            {
+                var result = await _userRepositories.VerifyEmailAndSendOtp(email);
+
+                if (!result)
+                {
+                    return BadRequest(new{success = false,message = "Email not found or OTP send failed."});
+                }
+
+                return Ok(new{success = true,message = "OTP sent successfully."});
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new{success = false,message = ex.Message});
+            }
+        }
+
+        [HttpPost("VerifyForgotPasswordOtp")]
+        public async Task<IActionResult> VerifyForgotPasswordOtp(string email,string otp)
+        {
+            try
+            {
+                var result = await _userRepositories.VerifyOtp(email, otp);
+
+                if (!result)
+                {
+                    return BadRequest(new{success = false,message = "Invalid or expired OTP."});
+                }
+
+                return Ok(new{success = true,message = "OTP verified successfully."});
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new{success = false,message = ex.Message});
+            }
+        }
+
+        [HttpPost("changePassword")]
+        public async Task<IActionResult> ResetForgotPassword(ChangePasswordDto model)
+        {
+            try
+            {
+                if (model.NewPassword != model.ConfirmPassword)
+                {
+                    return BadRequest(new{success = false,message = "New Password and Confirm Password does not match."});
+                }
+
+                var result = await _userRepositories.changePassword(model.Email,model.NewPassword);
+
+                if (!result)
+                {
+                    return BadRequest(new{success = false,message = "Password reset failed."});
+                }
+
+                return Ok(new{success = true,message = "Password changed successfully."});
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
         }
     }

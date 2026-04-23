@@ -13,8 +13,8 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<bool> UpdateJobAsync(int jobId, UpdateJobDto dto);
         Task<int> setStatusOnHold(int jobId);
         Task<int> setStatusClosed(int jobId);
+        Task<int> setStatusOpen(int jobId);
         Task<bool> ApplyJob(int jobId, int userId, string resumeurl);
         Task<IEnumerable<CandidateDto>> GetCandidatesByJobId(int jobId);
-
     }
 }
