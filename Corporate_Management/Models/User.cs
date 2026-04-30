@@ -31,6 +31,7 @@ namespace Corporate_Management.Models
         public string RoleId { get; set; }
         public string RoleName { get; set; }
         public int ManagerId { get; set; }
+        public string ManagerName { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
     }

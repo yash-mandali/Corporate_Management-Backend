@@ -5,7 +5,8 @@ namespace Corporate_Management.Repositories.IRepositories
 {
     public interface IUserRepositories
     {
-        Task<int> AddUserAsync(RegisterDto userDto);
+        Task<int> AddUserAsync(DefaultRegisterDto userDto);
+        Task<int> AdminAddUserAsync(AdminRegisterDto userDto);
         Task<int> UpdateUserAsync(UpdateUserDto userDto);
         Task<int> DeleteUserAsync(int id);
         Task<UserListDto> GetUserByIdAsync(int id);
@@ -31,7 +32,6 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<bool> VerifyEmailAndSendOtp(string email);
         Task<bool> VerifyOtp(string email, string otp);
         Task<bool> changePassword(string email, string newPassword);
-
     }
 }
 

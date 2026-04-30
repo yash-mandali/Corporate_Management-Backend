@@ -1,4 +1,5 @@
-﻿using Corporate_Management.Models;
+﻿using ClosedXML.Excel;
+using Corporate_Management.Models;
 using Corporate_Management.Models.Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
 using Corporate_Management.Repositories.IRepositories.Repositories;
@@ -209,6 +210,77 @@ namespace Corporate_Management.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = "failed to fetch Timesheet", error = ex.Message });
+            }
+        }
+
+        //-----------------------------------timesheetexport report-------------------------------
+
+        [HttpGet("ExportTimesheetReport")]
+        public async Task<IActionResult> ExportTimesheetReport([FromQuery] TimesheetReportParameters parameters)
+        {
+            try
+            {
+                var data = await _timesheetrepository.GetTimesheetReportdata(parameters);
+
+                if (data == null || !data.Any())
+                    return NotFound(new { message = "No records found for report." });
+
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Timesheet Report");
+
+                // Header
+                worksheet.Cell(1, 1).Value = "Employee Name";
+                worksheet.Cell(1, 2).Value = "Department";
+                worksheet.Cell(1, 3).Value = "Work Date";
+                worksheet.Cell(1, 4).Value = "Project";
+                worksheet.Cell(1, 5).Value = "Task";
+                worksheet.Cell(1, 6).Value = "Start Time";
+                worksheet.Cell(1, 7).Value = "End Time";
+                worksheet.Cell(1, 8).Value = "Total Hours";
+                worksheet.Cell(1, 9).Value = "Status";
+                worksheet.Cell(1, 10).Value = "Work Type";
+
+                var headerRange = worksheet.Range("A1:J1");
+
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Font.FontColor = XLColor.RichBlack;
+                headerRange.Style.Fill.BackgroundColor = XLColor.AshGrey;
+                headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                headerRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                int row = 2;
+
+                foreach (var item in data)
+                {
+                    worksheet.Cell(row, 1).Value = item.EmployeeName;
+                    worksheet.Cell(row, 2).Value = item.Department;
+                    worksheet.Cell(row, 3).Value = item.WorkDate.ToString("yyyy-MM-dd");
+                    worksheet.Cell(row, 4).Value = item.ProjectName;
+                    worksheet.Cell(row, 5).Value = item.TaskDescription;
+                    worksheet.Cell(row, 6).Value = item.StartTime.ToString(@"hh\:mm");
+                    worksheet.Cell(row, 7).Value = item.EndTime.ToString(@"hh\:mm");
+                    worksheet.Cell(row, 8).Value = item.TotalHours;
+                    worksheet.Cell(row, 9).Value = item.Status;
+                    worksheet.Cell(row, 10).Value = item.WorkType;
+
+                    row++;
+                }
+
+                worksheet.Columns().AdjustToContents();
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                stream.Position = 0;
+
+                return File(
+                    stream.ToArray(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"Timesheet_Report_{DateTime.Now:yyyyMMdd}.xlsx"
+                );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to generate report", error = ex.Message });
             }
         }
     }

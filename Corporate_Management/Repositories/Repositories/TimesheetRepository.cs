@@ -337,5 +337,31 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
+        //------------------------timesheet report----------------
+        public async Task<IEnumerable<TimesheetReportDto>> GetTimesheetReportdata(TimesheetReportParameters param)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@FromDate", param.FromDate);
+                parameters.Add("@ToDate", param.ToDate);
+                parameters.Add("@UserId", param.UserId);
+                parameters.Add("@Department", param.Department);
+                parameters.Add("@Status", param.Status);
+                parameters.Add("@WorkType", param.WorkType);
+                var result = await connection.QueryAsync<TimesheetReportDto>(
+                    "sp_GetTimesheetReportDate",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

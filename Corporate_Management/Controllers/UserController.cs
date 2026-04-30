@@ -21,14 +21,8 @@ namespace Corporate_Management.Controllers
         }
 
         [HttpPost("AddUser")]
-        public async Task<IActionResult> AddUser(RegisterDto userDto)
+        public async Task<IActionResult> AddUser(DefaultRegisterDto userDto)
         {
-
-            //if (ModelState.IsValid)
-            //{
-            //    return BadRequest(new { message = "Invalid model" });
-            //}
-
             try
             {
                 var userId = await _userRepositories.AddUserAsync(userDto);
@@ -40,6 +34,21 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        [HttpPost("HrAdminAddUser")]
+        public async Task<IActionResult> HrAdminAddUser(AdminRegisterDto userDto)
+        {
+
+            try
+            {
+                var userId = await _userRepositories.AdminAddUserAsync(userDto);
+                return Ok(new { message = "User registered Succesfully", UserId = userId });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error registering user", error = ex.Message });
+            }
+        }
+        
         [HttpPut("UpdateUser")]
         public async Task<IActionResult> UpdateUser(UpdateUserDto userDto)
         {

@@ -53,6 +53,51 @@ namespace Corporate_Management.Repositories.Repositories
 
         #endregion
 
+        //public async Task<int> userCheckIn(int Id)
+        //{
+        //    using var connection = new SqlConnection(_connectionString);
+
+        //    var parameters = new DynamicParameters();
+        //    parameters.Add("@UserId", Id);
+
+        //    var attendanceId = await connection.ExecuteScalarAsync<int>(
+        //        "sp_checkIn",
+        //        parameters,
+        //        commandType: CommandType.StoredProcedure
+        //    );
+
+        //    var userName = await connection.QuerySingleAsync<string>(
+        //        "SELECT Username FROM Users WHERE Id = @Id AND IsDeleted = 0",
+        //        new { Id }
+        //    );
+
+        //    var userIds = await connection.QueryAsync<int>(
+        //        "SELECT Id FROM Users WHERE RoleId IN (1,3,4) AND IsDeleted = 0"
+        //    );
+
+        //    var notificationId = await connection.QuerySingleAsync<int>(
+        //        "sp_CreateNotification",
+        //        new
+        //        {
+        //            Title = "Check-In",
+        //            Message = $"{userName} checked in",
+        //            Type = "Attendance"
+        //        },
+        //        commandType: CommandType.StoredProcedure
+        //    );
+
+        //    foreach (var userId in userIds)
+        //    {
+        //        await connection.ExecuteAsync(
+        //            "sp_InsertUserNotification",
+        //            new { NotificationId = notificationId, UserId = userId },
+        //            commandType: CommandType.StoredProcedure
+        //        );
+        //    }
+
+        //    return attendanceId;
+        //}
+
         public async Task<int> userCheckIn(int Id)
         {
             using var connection = new SqlConnection(_connectionString);
@@ -66,14 +111,24 @@ namespace Corporate_Management.Repositories.Repositories
                 commandType: CommandType.StoredProcedure
             );
 
-            var userName = await connection.QuerySingleAsync<string>(
-                "SELECT Username FROM Users WHERE Id = @Id AND IsDeleted = 0",
+            var user = await connection.QuerySingleAsync<dynamic>(
+                "SELECT Username, ManagerId FROM Users WHERE Id = @Id AND IsDeleted = 0",
                 new { Id }
             );
 
-            var userIds = await connection.QueryAsync<int>(
-                "SELECT Id FROM Users WHERE RoleId IN (1,3,4) AND IsDeleted = 0"
+            string userName = user.Username;
+            int? managerId = user.ManagerId;
+
+            var adminHrIds = await connection.QueryAsync<int>(
+                "SELECT Id FROM Users WHERE RoleId IN (1,4) AND IsDeleted = 0"
             );
+
+            var notifyUserIds = new List<int>(adminHrIds);
+
+            if (managerId.HasValue)
+            {
+                notifyUserIds.Add(managerId.Value);
+            }
 
             var notificationId = await connection.QuerySingleAsync<int>(
                 "sp_CreateNotification",
@@ -86,7 +141,7 @@ namespace Corporate_Management.Repositories.Repositories
                 commandType: CommandType.StoredProcedure
             );
 
-            foreach (var userId in userIds)
+            foreach (var userId in notifyUserIds.Distinct())
             {
                 await connection.ExecuteAsync(
                     "sp_InsertUserNotification",
@@ -98,6 +153,56 @@ namespace Corporate_Management.Repositories.Repositories
             return attendanceId;
         }
 
+        //public async Task<int> userCheckOut(int AId)
+        //{
+        //    using var connection = new SqlConnection(_connectionString);
+
+        //    var parameters = new DynamicParameters();
+        //    parameters.Add("@AttendenceId", AId);
+
+        //    var attendanceId =await connection.ExecuteAsync(
+        //        "sp_checkOut",
+        //        parameters,
+        //        commandType: CommandType.StoredProcedure
+        //    );
+
+        //    var userId = await connection.QuerySingleOrDefaultAsync<int>(
+        //        "SELECT UserId FROM Attendance WHERE AId = @AId",
+        //        new { AId }
+        //    );
+
+        //    var userName = await connection.QuerySingleOrDefaultAsync<string>(
+        //        "SELECT Username FROM Users WHERE Id = @Id AND IsDeleted = 0",
+        //        new { Id = userId }
+        //    );
+
+        //    var userIds = await connection.QueryAsync<int>(
+        //        "SELECT Id FROM Users WHERE RoleId IN (1,3,4) AND IsDeleted = 0"
+        //    );
+
+        //    var notificationId = await connection.QuerySingleAsync<int>(
+        //        "sp_CreateNotification",
+        //        new
+        //        {
+        //            Title = "Check-Out",
+        //            Message = $"{userName} checked out",
+        //            Type = "Attendance"
+        //        },
+        //        commandType: CommandType.StoredProcedure
+        //    );
+
+        //    foreach (var id in userIds)
+        //    {
+        //        await connection.ExecuteAsync(
+        //            "sp_InsertUserNotification",
+        //            new { NotificationId = notificationId, UserId = id },
+        //            commandType: CommandType.StoredProcedure
+        //        );
+        //    }
+
+        //    return attendanceId;
+        //}
+
         public async Task<int> userCheckOut(int AId)
         {
             using var connection = new SqlConnection(_connectionString);
@@ -105,7 +210,7 @@ namespace Corporate_Management.Repositories.Repositories
             var parameters = new DynamicParameters();
             parameters.Add("@AttendenceId", AId);
 
-            var attendanceId =await connection.ExecuteAsync(
+            var attendanceId = await connection.ExecuteAsync(
                 "sp_checkOut",
                 parameters,
                 commandType: CommandType.StoredProcedure
@@ -116,14 +221,24 @@ namespace Corporate_Management.Repositories.Repositories
                 new { AId }
             );
 
-            var userName = await connection.QuerySingleOrDefaultAsync<string>(
-                "SELECT Username FROM Users WHERE Id = @Id AND IsDeleted = 0",
+            var user = await connection.QuerySingleOrDefaultAsync<dynamic>(
+                "SELECT Username, ManagerId FROM Users WHERE Id = @Id AND IsDeleted = 0",
                 new { Id = userId }
             );
 
-            var userIds = await connection.QueryAsync<int>(
-                "SELECT Id FROM Users WHERE RoleId IN (1,3,4) AND IsDeleted = 0"
+            string userName = user?.Username ?? "User";
+            int? managerId = user?.ManagerId;
+
+            var adminHrIds = await connection.QueryAsync<int>(
+                "SELECT Id FROM Users WHERE RoleId IN (1,4) AND IsDeleted = 0"
             );
+
+            var notifyUserIds = new List<int>(adminHrIds);
+
+            if (managerId.HasValue)
+            {
+                notifyUserIds.Add(managerId.Value);
+            }
 
             var notificationId = await connection.QuerySingleAsync<int>(
                 "sp_CreateNotification",
@@ -136,7 +251,7 @@ namespace Corporate_Management.Repositories.Repositories
                 commandType: CommandType.StoredProcedure
             );
 
-            foreach (var id in userIds)
+            foreach (var id in notifyUserIds.Distinct())
             {
                 await connection.ExecuteAsync(
                     "sp_InsertUserNotification",
@@ -246,6 +361,5 @@ namespace Corporate_Management.Repositories.Repositories
                 throw;
             }
         }
-
     }
 }

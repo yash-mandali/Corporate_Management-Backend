@@ -149,25 +149,6 @@ namespace Corporate_Management.Controllers
             }
         }
 
-        [HttpGet("GetAttendanceReport")]
-        public async Task<IActionResult> getReport([FromQuery] AttendanceReportParameters parameters)
-        {
-            try
-            {
-                var Attendance = await _attendanceRepository.GetAttendanceReport(parameters);
-
-                if (Attendance == null)
-                    return NotFound(new { message = "Record not found" });
-
-                return Ok(new {message="getRepport api called",TotalRecords = Attendance.Count(), Report = Attendance });
-
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = "Failed to fetch Record", error = ex.Message });
-            }
-        }
-
         [HttpGet("ExportAttendanceReport")]
         public async Task<IActionResult> ExportAttendanceReport([FromQuery] AttendanceReportParameters parameters)
         {

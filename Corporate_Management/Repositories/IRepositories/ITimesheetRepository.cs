@@ -19,6 +19,8 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<int> RejectByManager(int sheetId, string reason);
         Task<IEnumerable<Timesheet>> GetManagerTeamTimesheets(int managerId);
 
-      
+        //------------timesheet report--------------
+        Task<IEnumerable<TimesheetReportDto>> GetTimesheetReportdata(TimesheetReportParameters param);
+
     }
 }

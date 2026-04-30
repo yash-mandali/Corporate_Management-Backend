@@ -20,7 +20,29 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
             _emailService = emailService;
         }
        
-        public async Task<int> AddUserAsync(RegisterDto userDto)
+        public async Task<int> AddUserAsync(DefaultRegisterDto userDto)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@UserName", userDto.UserName);
+                parameters.Add("@Email", userDto.Email);
+                parameters.Add("@PhoneNumber", userDto.PhoneNumber);
+                parameters.Add("@Password", BCrypt.Net.BCrypt.HashPassword(userDto.Password));
+                parameters.Add("@Gender", userDto.Gender);
+                parameters.Add("@RoleId", userDto.RoleId);
+                parameters.Add("@newId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+
+                await connection.ExecuteAsync("AddUser", parameters, commandType: CommandType.StoredProcedure);
+                return parameters.Get<int>("@newId");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public async Task<int> AdminAddUserAsync(AdminRegisterDto userDto)
         {
             try
             {
@@ -36,14 +58,14 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 parameters.Add("@RoleId", userDto.RoleId);
                 parameters.Add("@newId", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
-                await connection.ExecuteAsync("AddUser", parameters, commandType: CommandType.StoredProcedure);
+                await connection.ExecuteAsync("sp_HrAdminAddUser", parameters, commandType: CommandType.StoredProcedure);
                 return parameters.Get<int>("@newId");
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-        }   
+        }
         public async Task<int> UpdateUserAsync(UpdateUserDto userDto)
         {
             try
@@ -57,7 +79,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 parameters.Add("@Department", userDto.Department);
                 parameters.Add("@Gender", userDto.Gender);
                 parameters.Add("@Address", userDto.Address);
-                            
 
                 var updatedrows = await connection.ExecuteAsync("sp_UpdateUser", parameters, commandType: CommandType.StoredProcedure);
                 return updatedrows;
