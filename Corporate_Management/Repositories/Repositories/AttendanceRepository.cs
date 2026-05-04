@@ -270,7 +270,7 @@ namespace Corporate_Management.Repositories.Repositories
             var result = await connection.ExecuteAsync(
                 "sp_AutoCheckout",
                 commandType: CommandType.StoredProcedure
-            );
+            );         
 
             return result;
         }
