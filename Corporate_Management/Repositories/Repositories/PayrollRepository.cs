@@ -1,8 +1,6 @@
 ﻿using Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
 using Dapper;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.EMMA;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -186,7 +184,7 @@ namespace Corporate_Management.Repositories.Repositories
             return payrollId;
         }
 
-        public async Task<getPayrollData> getPayrollbyUserId(int userId)
+        public async Task<IEnumerable<getPayrollData>> getPayrollbyUserId(int userId)
         {
             try
             {
@@ -195,7 +193,12 @@ namespace Corporate_Management.Repositories.Repositories
                 var parameter = new DynamicParameters();
                 parameter.Add("@UserId", userId);
 
-                var data = await connection.QueryFirstOrDefaultAsync<getPayrollData>("sp_getPayrollByUserId", parameter, commandType: CommandType.StoredProcedure);
+                var data = await connection.QueryAsync<getPayrollData>(
+                    "sp_getPayrollByUserId",
+                    parameter,
+                    commandType: CommandType.StoredProcedure
+                );
+
                 return data;
             }
             catch (Exception)

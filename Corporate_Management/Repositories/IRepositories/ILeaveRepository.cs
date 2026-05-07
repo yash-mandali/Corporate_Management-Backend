@@ -31,5 +31,8 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<bool> InitilizeUsersLeaveBalance();
         Task<IEnumerable<UserLeaveBalanceDto>> getUserLeaveBalance(int userId);
 
+        //-------------------------------------Admin------------------------------------
+        Task<bool> UpdateLeaveBalance(int leaveTypeId, decimal defaultBalance);
+
     }
 }

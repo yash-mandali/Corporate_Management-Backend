@@ -29,7 +29,7 @@ namespace Corporate_Management.Controllers
 
                 var userId = await _leaveRepositories.CreateLeave(leave);
 
-                return Ok(new { message = "Leave Applied Succesfully"});
+                return Ok(new { message = "Leave Applied Succesfully" });
             }
             catch (Exception ex)
             {
@@ -120,7 +120,7 @@ namespace Corporate_Management.Controllers
         [HttpGet("managerTeam-AllLeaves")]
         public async Task<IActionResult> GetTeamAllLeaveRequests(int managerId)
         {
-            try 
+            try
             {
                 var leaves = await _leaveRepositories.GetTeamAllLeaveRequests(managerId);
 
@@ -138,7 +138,7 @@ namespace Corporate_Management.Controllers
         [HttpPut("withdrawLeave/{leaveRequestId}")]
         public async Task<IActionResult> WithdrawLeave(int leaveRequestId)
         {
-            try 
+            try
             {
                 var result = await _leaveRepositories.WithdrawLeave(leaveRequestId);
 
@@ -272,7 +272,7 @@ namespace Corporate_Management.Controllers
         [HttpPut("ManagerApproveLeave")]
         public async Task<IActionResult> ManagerApproveLeave(int id)
         {
-            try 
+            try
             {
                 var result = await _leaveRepositories.ManagerApproveLeave(id);
 
@@ -418,6 +418,37 @@ namespace Corporate_Management.Controllers
                 return StatusCode(500, new
                 {
                     message = "Error retrieving leave balance",
+                    error = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("updateLeaveBalance")]
+        public async Task<IActionResult> updateLeaveBalance(int leaveTypeId, decimal defaultBalance)
+        {
+            try
+            {
+                var result = await _leaveRepositories.UpdateLeaveBalance(leaveTypeId, defaultBalance);
+                if (!result)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Leave balance update failed"
+                    });
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Leave balance updated successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "update leavebalance failed",
                     error = ex.Message
                 });
             }

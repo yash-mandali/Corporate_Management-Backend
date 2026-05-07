@@ -463,7 +463,6 @@ namespace Corporate_Management.Repositories.Repositories
 
         //----------------------------------HR------------------------------------
 
-
         //public async Task<bool> HrApproveLeave(int leaveId)
         //{
         //    try
@@ -655,5 +654,30 @@ namespace Corporate_Management.Repositories.Repositories
             }
         }
 
+
+        //-----------------------------Admin-----------------------------
+
+        public async Task<bool> UpdateLeaveBalance(int leaveTypeId, decimal defaultBalance)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@Leavetype_Id", leaveTypeId);
+                parameters.Add("@Default_balance", defaultBalance);
+
+                var result = await connection.ExecuteAsync(
+                    "sp_updateLeaveBalance",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result > 0;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

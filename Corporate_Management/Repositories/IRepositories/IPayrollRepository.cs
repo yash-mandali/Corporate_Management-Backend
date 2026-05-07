@@ -10,7 +10,7 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<GetDataSalaryStructure> GetSalaryStructureByUserId(int userId);
         Task<IEnumerable<GetDataSalaryStructure>> GetAllSalaryStructure();
         Task<int> GeneratePayroll(GeneratePayroll model);
-        Task<getPayrollData> getPayrollbyUserId(int userId);
+        Task<IEnumerable<getPayrollData>> getPayrollbyUserId(int userId);
         Task<getPayrollData> getPayrollbyPayrollId(int PayrollId);
         Task<int> deletePayroll(int PayrollId);
         Task<bool> GeneratePayrollForAll(int month, int year);
