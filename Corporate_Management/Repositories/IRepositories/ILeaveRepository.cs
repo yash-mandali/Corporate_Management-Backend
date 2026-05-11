@@ -32,7 +32,11 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<IEnumerable<UserLeaveBalanceDto>> getUserLeaveBalance(int userId);
 
         //-------------------------------------Admin------------------------------------
+
+        Task<IEnumerable<getLeaveTypeDTO>> GetLeaveTypes();
         Task<bool> UpdateLeaveBalance(int leaveTypeId, decimal defaultBalance);
+        Task<bool> AddLeaveType(string leaveType, decimal defaultBalance);
+        Task<bool> deleteLeaveType(int leavetypeId);
 
     }
 }

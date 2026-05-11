@@ -432,5 +432,109 @@ namespace Corporate_Management.Repositories.Repositories
                 throw new Exception(ex.Message);
             }
         }
+
+        //public async Task<bool> UpdateApplicationStatus(int applicationId, string status)
+        //{
+        //    using var connection = new SqlConnection(_connectionString);
+
+        //    var parameters = new DynamicParameters();
+        //    parameters.Add("@ApplicationId", applicationId);
+        //    parameters.Add("@Status", status);
+
+        //    var result = await connection.ExecuteAsync(
+        //        "sp_UpdateJobApplicationStatus",
+        //        parameters,
+        //        commandType: CommandType.StoredProcedure
+        //    );
+        //    return true;
+        //}
+
+        public async Task<bool> UpdateApplicationStatus(int applicationId, string status)
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@ApplicationId", applicationId);
+            parameters.Add("@Status", status);
+
+            await connection.ExecuteAsync(
+                "sp_UpdateJobApplicationStatus",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            var applicationData = await connection.QueryFirstOrDefaultAsync<dynamic>(
+                @"SELECT 
+                    ja.UserId,
+                    ja.JobId,
+                    u.ManagerId,
+                    j.Title AS JobTitle,
+                    u.Username
+                  FROM JobApplications ja
+                  INNER JOIN Users u ON ja.UserId = u.Id
+                  INNER JOIN Jobs j ON ja.JobId = j.JobId
+                  WHERE ja.ApplicationId = @ApplicationId",
+                new { ApplicationId = applicationId }
+            );
+
+            if (applicationData == null)
+                return false;
+
+            int applicantId = applicationData.UserId;
+            int? managerId = applicationData.ManagerId;
+            string jobTitle = applicationData.JobTitle;
+            string userName = applicationData.Username;
+
+            // Create notification
+            var notificationId = await connection.QuerySingleAsync<int>(
+                "sp_CreateNotification",
+                new
+                {
+                    Title = "Application Status Updated",
+                    Message = $"Your application for '{jobTitle}' has been updated to '{status}'.",
+                    Type = "Recruitment"
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            // Notify Applicant
+            await connection.ExecuteAsync(
+                "sp_InsertUserNotification",
+                new
+                {
+                    NotificationId = notificationId,
+                    UserId = applicantId
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            // Notify Assigned Manager
+            if (managerId.HasValue)
+            {
+                var managerNotificationId = await connection.QuerySingleAsync<int>(
+                    "sp_CreateNotification",
+                    new
+                    {
+                        Title = "Candidate Status Updated",
+                        Message = $"Candidate '{userName}' application status changed to '{status}' for job '{jobTitle}'.",
+                        Type = "Recruitment"
+                    },
+                    commandType: CommandType.StoredProcedure
+                );
+
+                await connection.ExecuteAsync(
+                    "sp_InsertUserNotification",
+                    new
+                    {
+                        NotificationId = managerNotificationId,
+                        UserId = managerId.Value
+                    },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+
+            return true;
+        }
     }
 }
+

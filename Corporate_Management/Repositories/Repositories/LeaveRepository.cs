@@ -656,7 +656,24 @@ namespace Corporate_Management.Repositories.Repositories
 
 
         //-----------------------------Admin-----------------------------
+        public async Task<IEnumerable<getLeaveTypeDTO>> GetLeaveTypes()
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
 
+                var result = await connection.QueryAsync<getLeaveTypeDTO>(
+                    "sp_getLeavetypes",
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
         public async Task<bool> UpdateLeaveBalance(int leaveTypeId, decimal defaultBalance)
         {
             try
@@ -679,5 +696,50 @@ namespace Corporate_Management.Repositories.Repositories
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<bool> AddLeaveType(string leaveType, decimal defaultBalance)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@Leavetype", leaveType);
+                parameters.Add("@Default_balance", defaultBalance);
+
+                var result = await connection.ExecuteAsync(
+                    "sp_AddLeaveType",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result > 0;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<bool> deleteLeaveType(int leavetypeId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var parameters = new DynamicParameters();
+                parameters.Add("@Leavetype_Id", leavetypeId);
+                var result = await connection.ExecuteAsync(
+                   "sp_deleteLeaveType",
+                   parameters,
+                   commandType: CommandType.StoredProcedure
+               );
+                return result > 0;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        
     }
 }

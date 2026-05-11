@@ -366,5 +366,26 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        [HttpPut("updateJobApplicationStatus")]
+        public async Task<IActionResult> UpdateApplicationStatus(int applicationId, string status)
+        {
+            try
+            {
+                var result = await _recruitmentRepository.UpdateApplicationStatus(applicationId, status);
+
+                if (!result)
+                    return BadRequest(new { message = "Status update failed" });
+
+                return Ok(new { message = "Status updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = "Error updating status",
+                    error = ex.Message
+                });
+            }
+        }
     }
 }

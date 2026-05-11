@@ -54,4 +54,10 @@
         public decimal? RemainingLeaveBalance { get; set; }
         public int Balance_year { get; set; }
     }
+
+    public class getLeaveTypeDTO
+    {
+        public int Leavetype_Id { get; set; }
+        public string LeaveType { get; set; }
+    }
 }

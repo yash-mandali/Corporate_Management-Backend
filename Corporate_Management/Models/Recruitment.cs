@@ -19,10 +19,10 @@
             public string Status { get; set; } = "Draft";   
             public DateTime? Publish_date { get; set; }
             public DateTime? Application_deadline { get; set; }
-            public bool IdDeleted { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime? UpdatedAt { get; set; }
-            public DateTime? Deleted_At { get; set; }
+            public bool IsDeleted { get; set; }
+            public DateTime Created_At { get; set; }
+            public DateTime? Updated_At { get; set; }
+            public DateTime? deleted_At { get; set; }
     }
-    }
+}
 

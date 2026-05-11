@@ -16,5 +16,6 @@ namespace Corporate_Management.Repositories.IRepositories
         Task<int> setStatusOpen(int jobId);
         Task<bool> ApplyJob(int jobId, int userId, string resumeurl);
         Task<IEnumerable<CandidateDto>> GetCandidatesByJobId(int jobId);
+        Task<bool> UpdateApplicationStatus(int applicationId, string status);
     }
 }

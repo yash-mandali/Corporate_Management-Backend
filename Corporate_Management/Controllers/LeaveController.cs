@@ -3,7 +3,9 @@ using Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
 using Corporate_Management.Repositories.IRepositories.Repositories;
 using Corporate_Management.Repositories.Repositories;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Corporate_Management.Controllers
@@ -19,7 +21,6 @@ namespace Corporate_Management.Controllers
         {
             _leaveRepositories = leaveRepositories;
         }
-
 
         [HttpPost("ApplyLeave")]
         public async Task<IActionResult> ApplyLeave(Leave leave)
@@ -423,6 +424,32 @@ namespace Corporate_Management.Controllers
             }
         }
 
+        //----------------------------------admin----------------------
+
+        [HttpGet("getLeaveTypes")]
+        public async Task<IActionResult> GetLeaveTypes()
+        {
+            try
+            {
+                var result = await _leaveRepositories.GetLeaveTypes();
+
+                if (result == null || !result.Any())
+                {
+                    return NotFound(new{message = "No leave types found"});
+                }
+
+                return Ok(new { message = "Leave types fetched successfully", data = result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Failed to fetch leave types",
+                    error = ex.Message
+                });
+            }
+        }
+
         [HttpPut("updateLeaveBalance")]
         public async Task<IActionResult> updateLeaveBalance(int leaveTypeId, decimal defaultBalance)
         {
@@ -449,6 +476,46 @@ namespace Corporate_Management.Controllers
                 return StatusCode(500, new
                 {
                     message = "update leavebalance failed",
+                    error = ex.Message
+                });
+            }
+        }
+
+        [HttpPost("AddLeaveType")]
+        public async Task<IActionResult> addLeaveType (string leaveType, decimal defaultBalance)
+        {
+            try
+            {
+                var result = await _leaveRepositories.AddLeaveType(leaveType, defaultBalance);
+
+                if (!result)
+                    return BadRequest(new {message = "Failed to add leave type" });
+
+                return Ok(new { message = "LeaveType Added Succesfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "LeaveType Error", error = ex.Message });
+            }
+        }
+
+        [HttpDelete("deleteLeavetype")]
+        public async Task<IActionResult> deleteLeavetype(int leaveTypeId)
+        {
+            try
+            {
+                var result = await _leaveRepositories.deleteLeaveType(leaveTypeId);
+
+                if (!result)
+                    return BadRequest(new { message = "Failed to delete leave type" });
+
+                return Ok(new { message = "LeaveType deleted Succesfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "delete leavetype failed",
                     error = ex.Message
                 });
             }
