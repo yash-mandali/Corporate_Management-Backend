@@ -696,7 +696,6 @@ namespace Corporate_Management.Repositories.Repositories
                 throw new Exception(ex.Message);
             }
         }
-
         public async Task<bool> AddLeaveType(string leaveType, decimal defaultBalance)
         {
             try
@@ -719,7 +718,6 @@ namespace Corporate_Management.Repositories.Repositories
                 throw new Exception(ex.Message);
             }
         }
-
         public async Task<bool> deleteLeaveType(int leavetypeId)
         {
             try
@@ -739,7 +737,5 @@ namespace Corporate_Management.Repositories.Repositories
                 throw new Exception(ex.Message);
             }
         }
-
-        
     }
 }

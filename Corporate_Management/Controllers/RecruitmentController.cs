@@ -211,7 +211,7 @@ namespace Corporate_Management.Controllers
         {
             try
             {
-                var result = await _recruitmentRepository.setStatusClosed(jobId);
+                var result = await _recruitmentRepository.setStatusOpen(jobId);
                 if (result == 1)
                 {
                     return Ok(new { success = true, message = "Job opened" });

@@ -9,7 +9,7 @@ namespace Corporate_Management.Repositories.Repositories
 {
     public class RecruitmentRepository:IRecruitmentRepository
     {
-        public readonly string _connectionString;
+        public readonly string _connectionString;    
         public RecruitmentRepository(IConfiguration config)
         {
             _connectionString = config.GetConnectionString("dbconnection");

@@ -49,6 +49,7 @@
         public int LeavebalanceId { get; set; }
         public int UserId { get; set; }
         public int Leavetype_Id { get; set; }
+        public string Leavetype { get; set; }
         public decimal? TotalLeaveBalance { get; set; }
         public decimal? UsedLeaveBalance { get; set; }
         public decimal? RemainingLeaveBalance { get; set; }
@@ -59,5 +60,7 @@
     {
         public int Leavetype_Id { get; set; }
         public string LeaveType { get; set; }
+        public decimal Default_balance { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

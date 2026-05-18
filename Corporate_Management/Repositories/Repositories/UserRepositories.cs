@@ -298,7 +298,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 );
             }
         }
-
         public async Task<List<int>> GetUsersByRoles(List<int> roleIds)
         {
             try
@@ -317,7 +316,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
             }
 
         }
-
         public async Task<IEnumerable<dynamic>> GetUserNotifications(int userId)
         {
             try
@@ -336,7 +334,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw ex;
             }
         }
-
         public async Task MarkAsRead(int notificationId, int userId)
         {
             try
@@ -353,8 +350,6 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw ex;
             }
         }
-
-        // Repository Method
         public async Task<bool> MarkAllAsRead(int userId)
         {
             try
@@ -379,6 +374,7 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
         }
 
         //---------------------forgot password section-------------------------
+
         public async Task<bool> VerifyEmailAndSendOtp(string email)
         {
             try
