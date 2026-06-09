@@ -210,7 +210,6 @@ namespace Corporate_Management.Controllers
                 var Token = _getToken.GenerateJwtToken(response);
 
                 return Ok(new { message = "Login successful", token = Token, role = user.RoleName, userId = user.Id });
-
             }
             catch (Exception ex)
             {

@@ -60,7 +60,7 @@ namespace Corporate_Management.Repositories.Repositories
 
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
         }
 

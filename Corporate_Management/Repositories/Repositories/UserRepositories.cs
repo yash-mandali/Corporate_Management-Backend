@@ -3,8 +3,6 @@ using Corporate_Management.DTOs;
 using Corporate_Management.Models;
 using Corporate_Management.Services;
 using Dapper;
-using DocumentFormat.OpenXml.EMMA;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.Data.SqlClient;
 using System.Data;
 

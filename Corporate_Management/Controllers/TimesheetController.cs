@@ -37,7 +37,7 @@ namespace Corporate_Management.Controllers
         }
 
         [HttpPut("updateTimesheetEntry")]
-        public async Task<IActionResult> UpdateLeave(updateTimesheet timesheet)
+        public async Task<IActionResult> updateTimesheetEntry(updateTimesheet timesheet)
         {
             try
             {
@@ -193,7 +193,6 @@ namespace Corporate_Management.Controllers
                 return BadRequest(new { message = "Timesheet Rejected error", error = ex.Message });
             }
         }
-
   
         [HttpGet("getByStatus(manager)")]
         public async Task<IActionResult> getTimesheetByStatus(string status)
