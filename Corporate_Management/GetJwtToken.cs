@@ -21,7 +21,7 @@ namespace Corporate_Management
                 new Claim(ClaimTypes.Email,users.Email),
                 new Claim(ClaimTypes.Role,users.RoleName)
             };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["jwt:key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["jwt:Key"]));
 
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -29,10 +29,11 @@ namespace Corporate_Management
                 issuer: _config["jwt:Issuer"],
                 audience: _config["jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_config["jwt:ExpireMinutes"])),
+                expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(_config["jwt:ExpireMinutes"])),
                 signingCredentials: cred
             );
             return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+        }                                                                                                                                                                                              
     }
 }
+                                                                                                                          

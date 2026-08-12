@@ -1,11 +1,7 @@
 ﻿using ClosedXML.Excel;
-using Corporate_Management.DTOs;
 using Corporate_Management.Models;
 using Corporate_Management.Repositories.IRepositories;
-using Corporate_Management.Repositories.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Xml.Serialization;
 
 namespace Corporate_Management.Controllers
 {
@@ -211,5 +207,4 @@ namespace Corporate_Management.Controllers
             }
         }
     }
-
 }

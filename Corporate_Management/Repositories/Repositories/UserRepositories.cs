@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using Corporate_Management.DTOs;
+﻿using Corporate_Management.DTOs;
 using Corporate_Management.Models;
 using Corporate_Management.Services;
 using Dapper;
@@ -40,6 +39,7 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
                 throw ex;
             }
         }
+
         public async Task<int> AdminAddUserAsync(AdminRegisterDto userDto)
         {
             try
@@ -206,6 +206,8 @@ namespace Corporate_Management.Repositories.IRepositories.Repositories
 
             return user;
         }
+
+
         public async Task LogoutUser(int userId)
         {
             using var connection = new SqlConnection(_connectionString);
